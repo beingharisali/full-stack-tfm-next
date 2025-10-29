@@ -1,13 +1,33 @@
 "use client";
 import Link from "next/link";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function RegisterPage() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Register submitted with:", {
+      name,
+      email,
+      password,
+      confirmPassword,
+    });
+
+    toast.success("Registered successfully!");
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white shadow-lg p-8 rounded-xl w-full max-w-sm">
         <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
 
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          {" "}
           <div className="flex flex-col">
             <label htmlFor="name" className="text-sm font-medium text-gray-600">
               Name
@@ -17,9 +37,10 @@ export default function RegisterPage() {
               id="name"
               className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="Enter your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
-
           <div className="flex flex-col">
             <label
               htmlFor="email"
@@ -32,9 +53,10 @@ export default function RegisterPage() {
               id="email"
               className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-
           <div className="flex flex-col">
             <label
               htmlFor="password"
@@ -47,9 +69,10 @@ export default function RegisterPage() {
               id="password"
               className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-
           <div className="flex flex-col">
             <label
               htmlFor="confirmPassword"
@@ -62,9 +85,10 @@ export default function RegisterPage() {
               id="confirmPassword"
               className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="Re-enter your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
-
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition"
