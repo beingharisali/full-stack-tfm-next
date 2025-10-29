@@ -10,7 +10,7 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Login submitted with:", { email, password });
-    toast.success("Login successful!");
+    toast.success("Login successfully!");
   };
 
   return (

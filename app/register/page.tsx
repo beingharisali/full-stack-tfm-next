@@ -15,7 +15,6 @@ export default function RegisterPage() {
       name,
       email,
       password,
-      confirmPassword,
     });
 
     toast.success("Registered successfully!");
