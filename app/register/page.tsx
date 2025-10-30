@@ -2,22 +2,59 @@
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import axios, { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Register submitted with:", {
-      name,
-      email,
-      password,
-    });
 
-    toast.success("Registered successfully!");
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post("/api/register", {
+        name,
+        email,
+        password,
+      });
+
+      console.log("Registration successful:", response.data);
+      toast.success("Registered successfully! Please log in.");
+      router.push("");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<{ message?: string }>;
+        const errorMessage =
+          axiosError.response?.data?.message || axiosError.message;
+        console.error("Registration failed:", errorMessage);
+        toast.error(
+          axiosError.response?.data?.message ||
+            "Registration failed. Please try again."
+        );
+      } else if (error instanceof Error) {
+        console.error("Registration failed (general error):", error.message);
+        toast.error(
+          error.message || "An unexpected error occurred during registration."
+        );
+      } else {
+        console.error("Registration failed (unknown error):", error);
+        toast.error("An unknown error occurred during registration.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,6 +75,8 @@ export default function RegisterPage() {
               placeholder="Enter your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              required
+              disabled={loading}
             />
           </div>
           <div className="flex flex-col">
@@ -54,6 +93,8 @@ export default function RegisterPage() {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={loading}
             />
           </div>
           <div className="flex flex-col">
@@ -70,6 +111,8 @@ export default function RegisterPage() {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
             />
           </div>
           <div className="flex flex-col">
@@ -86,13 +129,16 @@ export default function RegisterPage() {
               placeholder="Re-enter your password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              disabled={loading}
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
           >
-            Register
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
 
