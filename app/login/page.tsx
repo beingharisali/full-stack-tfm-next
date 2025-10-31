@@ -21,7 +21,6 @@ export default function LoginPage() {
           <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-            {" "}
             <div className="flex flex-col">
               <label
                 htmlFor="email"
@@ -68,7 +67,7 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-sm text-gray-600 mt-4">
-            {"Don’t"} have an account?{" "}
+            Don’t have an account?{" "}
             <Link
               href="/register"
               className="text-blue-600 font-semibold hover:underline"

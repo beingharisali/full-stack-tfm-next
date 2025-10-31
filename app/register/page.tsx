@@ -29,7 +29,6 @@ export default function RegisterPage() {
         <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          {" "}
           <div className="flex flex-col">
             <label htmlFor="name" className="text-sm font-medium text-gray-600">
               Name

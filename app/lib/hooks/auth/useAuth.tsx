@@ -68,7 +68,7 @@ export function useAuth() {
       });
       console.log("Login successful:", response.data);
       toast.success("Login successfully!");
-      router.push("/dashboard");
+      router.push("");
       return true;
     } catch (error) {
       handleAuthError(error, "Login failed. Please check your credentials.");
