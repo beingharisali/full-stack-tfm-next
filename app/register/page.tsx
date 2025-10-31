@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useAuth } from "../lib/hooks/auth/useAuth";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -9,16 +10,17 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Register submitted with:", {
-      name,
-      email,
-      password,
-      confirmPassword,
-    });
+  const { loading, register } = useAuth();
 
-    toast.success("Registered successfully!");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    await register(name, email, password);
   };
 
   return (
@@ -27,7 +29,6 @@ export default function RegisterPage() {
         <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          {" "}
           <div className="flex flex-col">
             <label htmlFor="name" className="text-sm font-medium text-gray-600">
               Name
@@ -39,6 +40,8 @@ export default function RegisterPage() {
               placeholder="Enter your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              required
+              disabled={loading}
             />
           </div>
           <div className="flex flex-col">
@@ -55,6 +58,8 @@ export default function RegisterPage() {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={loading}
             />
           </div>
           <div className="flex flex-col">
@@ -71,6 +76,8 @@ export default function RegisterPage() {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
             />
           </div>
           <div className="flex flex-col">
@@ -87,20 +94,23 @@ export default function RegisterPage() {
               placeholder="Re-enter your password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              disabled={loading}
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
           >
-            Register
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-4">
           Already have an account?{" "}
           <Link
-            href="/"
+            href="/login"
             className="text-blue-600 font-semibold hover:underline"
           >
             Login
