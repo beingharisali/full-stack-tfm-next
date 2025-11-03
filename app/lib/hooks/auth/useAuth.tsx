@@ -44,7 +44,7 @@ export function useAuth() {
       });
       console.log("Registration successful:", response.data);
       toast.success("Registered successfully! Please log in.");
-      router.push("/");
+      router.push("/login");
       return true;
     } catch (error) {
       handleAuthError(error, "Registration failed. Please try again.");
@@ -68,7 +68,8 @@ export function useAuth() {
       });
       console.log("Login successful:", response.data);
       toast.success("Login successfully!");
-      router.push("");
+
+      router.push("/dashboard");
       return true;
     } catch (error) {
       handleAuthError(error, "Login failed. Please check your credentials.");
