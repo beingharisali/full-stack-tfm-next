@@ -1,11 +1,16 @@
+import { Sidebar } from 'lucide-react'
 import React from 'react'
-import Nav from '../component/Navbar'
-import Sidebar from '../component/sidebar'
-export default function page() {
+import Nav from './Navbar'
+import Dashboard from './dashboard'
+
+function Page() {
   return (
     <div>
-      <Nav/>
+        <Nav/>
       <Sidebar/>
+      <Dashboard/>
     </div>
   )
 }
+
+export default Page
