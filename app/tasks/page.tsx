@@ -4,7 +4,6 @@ import Nav from "../component/Navbar";
 import TaskForm from "../component/TaskForm"; 
 import { Toaster, toast } from "react-hot-toast";
 
-console.log("working");
 
 interface Task {
   id: string;
