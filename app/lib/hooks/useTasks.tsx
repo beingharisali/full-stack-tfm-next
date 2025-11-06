@@ -9,13 +9,14 @@ if (!API_BASE_URL) {
 }
 
 interface Task {
-  _id?: string; 
+  _id?: string;
   title: string;
   description: string;
   dueDate: string;
-  status: "pending" | "in progress" | "completed"; 
+  status: "pending" | "in progress" | "completed";
   priority?: "low" | "medium" | "high" | "urgent";
-  assignee?: string; 
+  assignee?: string;
+  assigneeEmail?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -27,7 +28,10 @@ export function useTasks() {
 
   const handleApiError = useCallback((err: unknown, defaultMessage: string) => {
     if (axios.isAxiosError(err)) {
-      const axiosError = err as AxiosError<{ message?: string; error?: string }>;
+      const axiosError = err as AxiosError<{
+        message?: string;
+        error?: string;
+      }>;
       const errorMessage =
         axiosError.response?.data?.message ||
         axiosError.response?.data?.error ||
@@ -53,7 +57,9 @@ export function useTasks() {
       if (!API_BASE_URL) {
         throw new Error("API base URL is not defined. Cannot fetch tasks.");
       }
-      const response = await axios.get(`${API_BASE_URL.replace("/auth", "")}/task`);
+      const response = await axios.get(
+        `${API_BASE_URL.replace("/auth", "")}/task`
+      );
       setTasks(response.data.tasks);
       return response.data.tasks;
     } catch (err) {
@@ -64,66 +70,81 @@ export function useTasks() {
     }
   }, [handleApiError]);
 
-  const createTask = useCallback(async (newTask: Omit<Task, "_id" | "createdAt" | "updatedAt">) => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (!API_BASE_URL) {
-        throw new Error("API base URL is not defined. Cannot create task.");
+  const createTask = useCallback(
+    async (newTask: Omit<Task, "_id" | "createdAt" | "updatedAt">) => {
+      setLoading(true);
+      setError(null);
+      try {
+        if (!API_BASE_URL) {
+          throw new Error("API base URL is not defined. Cannot create task.");
+        }
+        const response = await axios.post(
+          `${API_BASE_URL.replace("/auth", "")}/task`,
+          newTask
+        );
+        const createdTask = response.data.task;
+        setTasks((prevTasks) => [...prevTasks, createdTask]);
+        toast.success("Task created successfully!");
+        return createdTask;
+      } catch (err) {
+        handleApiError(err, "Failed to create task.");
+        return null;
+      } finally {
+        setLoading(false);
       }
-      const response = await axios.post(`${API_BASE_URL.replace("/auth", "")}/task`, newTask);
-      const createdTask = response.data.task;
-      setTasks((prevTasks) => [...prevTasks, createdTask]);
-      toast.success("Task created successfully!");
-      return createdTask;
-    } catch (err) {
-      handleApiError(err, "Failed to create task.");
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [handleApiError]);
+    },
+    [handleApiError]
+  );
 
-  const updateTask = useCallback(async (id: string, updatedTask: Partial<Task>) => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (!API_BASE_URL) {
-        throw new Error("API base URL is not defined. Cannot update task.");
+  const updateTask = useCallback(
+    async (id: string, updatedTask: Partial<Task>) => {
+      setLoading(true);
+      setError(null);
+      try {
+        if (!API_BASE_URL) {
+          throw new Error("API base URL is not defined. Cannot update task.");
+        }
+        const response = await axios.put(
+          `${API_BASE_URL.replace("/auth", "")}/task/${id}`,
+          updatedTask
+        );
+        const returnedTask = response.data.task;
+        setTasks((prevTasks) =>
+          prevTasks.map((task) => (task._id === id ? returnedTask : task))
+        );
+        toast.success("Task updated successfully!");
+        return returnedTask;
+      } catch (err) {
+        handleApiError(err, "Failed to update task.");
+        return null;
+      } finally {
+        setLoading(false);
       }
-      const response = await axios.put(`${API_BASE_URL.replace("/auth", "")}/task/${id}`, updatedTask);
-      const returnedTask = response.data.task;
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => (task._id === id ? returnedTask : task))
-      );
-      toast.success("Task updated successfully!");
-      return returnedTask;
-    } catch (err) {
-      handleApiError(err, "Failed to update task.");
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [handleApiError]);
+    },
+    [handleApiError]
+  );
 
-  const deleteTask = useCallback(async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (!API_BASE_URL) {
-        throw new Error("API base URL is not defined. Cannot delete task.");
+  const deleteTask = useCallback(
+    async (id: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        if (!API_BASE_URL) {
+          throw new Error("API base URL is not defined. Cannot delete task.");
+        }
+        await axios.delete(`${API_BASE_URL.replace("/auth", "")}/task/${id}`);
+        setTasks((prevTasks) => prevTasks.filter((task) => task._id !== id));
+        toast.success("Task deleted successfully!");
+        return true;
+      } catch (err) {
+        handleApiError(err, "Failed to delete task.");
+        return false;
+      } finally {
+        setLoading(false);
       }
-      await axios.delete(`${API_BASE_URL.replace("/auth", "")}/task/${id}`);
-      setTasks((prevTasks) => prevTasks.filter((task) => task._id !== id));
-      toast.success("Task deleted successfully!");
-      return true;
-    } catch (err) {
-      handleApiError(err, "Failed to delete task.");
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, [handleApiError]);
+    },
+    [handleApiError]
+  );
 
   return {
     tasks,

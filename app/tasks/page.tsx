@@ -14,6 +14,7 @@ interface Task {
   status: "pending" | "in progress" | "completed";
   priority?: "low" | "medium" | "high" | "urgent";
   assignee?: string;
+  assigneeEmail?: string;
 }
 
 export default function TasksPage() {
@@ -44,6 +45,7 @@ export default function TasksPage() {
         description: task.description,
         dueDate: task.dueDate,
         status: task.status,
+        assigneeEmail: task.assigneeEmail,
       });
     } else {
       result = await createTask({
@@ -51,6 +53,7 @@ export default function TasksPage() {
         description: task.description,
         dueDate: task.dueDate,
         status: task.status,
+        assigneeEmail: task.assigneeEmail,
       });
     }
 
@@ -100,7 +103,9 @@ export default function TasksPage() {
       <Toaster />
       <Nav />
       <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Task Management</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">
+          Task Management
+        </h1>
 
         <button
           onClick={() => {
@@ -114,7 +119,7 @@ export default function TasksPage() {
 
         {showForm && (
           <TaskForm
-            key={editingTask?._id || 'new-task'}
+            key={editingTask?._id || "new-task"}
             initialTask={editingTask}
             onSave={handleSaveTask}
             onCancel={handleCancelForm}
@@ -139,7 +144,8 @@ export default function TasksPage() {
                     </h3>
                     <p className="text-gray-700">{task.description}</p>
                     <p className="text-sm text-gray-500">
-                      Due: {new Date(task.dueDate).toLocaleDateString()} | Status:{" "}
+                      Due: {new Date(task.dueDate).toLocaleDateString()} |
+                      Status:{" "}
                       <span
                         className={`font-medium ${
                           task.status === "completed"
@@ -149,8 +155,12 @@ export default function TasksPage() {
                             : "text-red-600"
                         }`}
                       >
-                        {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                        {task.status.charAt(0).toUpperCase() +
+                          task.status.slice(1)}
                       </span>
+                      {task.assigneeEmail && (
+                        <span> | Assignee: {task.assigneeEmail}</span>
+                      )}
                     </p>
                   </div>
                   <div className="flex space-x-2">
