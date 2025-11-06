@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react"; 
 import toast from "react-hot-toast";
 
 interface Task {
@@ -7,7 +7,7 @@ interface Task {
   title: string;
   description: string;
   dueDate: string;
-  status: "pending" | "in-progress" | "completed";
+  status: "pending" | "in progress" | "completed";
   priority?: "low" | "medium" | "high" | "urgent";
 }
 
@@ -32,29 +32,6 @@ const TaskForm: React.FC<TaskFormProps> = ({
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (
-      initialTask &&
-      (initialTask.title !== title ||
-        initialTask.description !== description ||
-        initialTask.dueDate !== dueDate ||
-        initialTask.status !== status)
-    ) {
-      setTitle(initialTask?.title ?? "");
-      setDescription(initialTask?.description ?? "");
-      setDueDate(initialTask?.dueDate ?? "");
-      setStatus(initialTask?.status ?? "pending");
-      setErrors({});
-    }
-
-    if (!initialTask && (title || description || dueDate)) {
-      setTitle("");
-      setDescription("");
-      setDueDate("");
-      setStatus("pending");
-      setErrors({});
-    }
-  }, [initialTask]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};

@@ -1,35 +1,35 @@
 "use client";
 
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 import Nav from "../component/Navbar";
 import TaskForm from "../component/TaskForm";
-import { Toaster, toast } from "react-hot-toast";
-import { useTasks } from "../lib/hooks/useTasks"; 
+import { Toaster } from "react-hot-toast";
+import { useTasks } from "../lib/hooks/useTasks";
 
 interface Task {
-  _id?: string; 
+  _id?: string;
   title: string;
   description: string;
   dueDate: string;
-  status: "pending" | "in-progress" | "completed"; 
-  priority?: "low" | "medium" | "high" | "urgent"; 
-  assignee?: string; 
+  status: "pending" | "in progress" | "completed";
+  priority?: "low" | "medium" | "high" | "urgent";
+  assignee?: string;
 }
 
 export default function TasksPage() {
   const {
     tasks,
-    loading: tasksLoading, 
+    loading: tasksLoading,
     error,
     fetchTasks,
     createTask,
     updateTask,
-    deleteTask: deleteTaskApi, 
+    deleteTask: deleteTaskApi,
   } = useTasks();
 
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [showForm, setShowForm] = useState(false);
-  const [formLoading, setFormLoading] = useState(false); 
+  const [formLoading, setFormLoading] = useState(false);
 
   useEffect(() => {
     fetchTasks();
@@ -38,7 +38,7 @@ export default function TasksPage() {
   const handleSaveTask = async (task: Task) => {
     setFormLoading(true);
     let result;
-    if (task._id) { 
+    if (task._id) {
       result = await updateTask(task._id, {
         title: task.title,
         description: task.description,
@@ -69,7 +69,7 @@ export default function TasksPage() {
   const handleDeleteTask = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this task?")) {
       setFormLoading(true);
-      await deleteTaskApi(id); 
+      await deleteTaskApi(id);
       setFormLoading(false);
     }
   };
@@ -114,10 +114,11 @@ export default function TasksPage() {
 
         {showForm && (
           <TaskForm
+            key={editingTask?._id || 'new-task'}
             initialTask={editingTask}
             onSave={handleSaveTask}
             onCancel={handleCancelForm}
-            isLoading={formLoading} 
+            isLoading={formLoading}
           />
         )}
 
@@ -129,7 +130,7 @@ export default function TasksPage() {
             <ul className="space-y-4">
               {tasks.map((task) => (
                 <li
-                  key={task._id} 
+                  key={task._id}
                   className="bg-gray-50 p-4 rounded-md shadow-sm flex justify-between items-center"
                 >
                   <div>
@@ -143,7 +144,7 @@ export default function TasksPage() {
                         className={`font-medium ${
                           task.status === "completed"
                             ? "text-green-600"
-                            : task.status === "in-progress"
+                            : task.status === "in progress"
                             ? "text-yellow-600"
                             : "text-red-600"
                         }`}
@@ -160,7 +161,7 @@ export default function TasksPage() {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDeleteTask(task._id!)} 
+                      onClick={() => handleDeleteTask(task._id!)}
                       className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
                     >
                       Delete
