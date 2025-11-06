@@ -8,6 +8,7 @@ interface Task {
   description: string;
   dueDate: string;
   status: "pending" | "in-progress" | "completed";
+  priority?: "low" | "medium" | "high" | "urgent";
 }
 
 interface TaskFormProps {

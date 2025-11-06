@@ -1,38 +1,64 @@
 "use client";
-import React, { useState } from "react";
-import Nav from "../component/Navbar";
-import TaskForm from "../component/TaskForm"; 
-import { Toaster, toast } from "react-hot-toast";
 
+import React, { useState, useEffect } from "react"; 
+import Nav from "../component/Navbar";
+import TaskForm from "../component/TaskForm";
+import { Toaster, toast } from "react-hot-toast";
+import { useTasks } from "../lib/hooks/useTasks"; 
 
 interface Task {
-  id: string;
+  _id?: string; 
   title: string;
   description: string;
   dueDate: string;
-  status: "pending" | "in-progress" | "completed";
+  status: "pending" | "in-progress" | "completed"; 
+  priority?: "low" | "medium" | "high" | "urgent"; 
+  assignee?: string; 
 }
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const {
+    tasks,
+    loading: tasksLoading, 
+    error,
+    fetchTasks,
+    createTask,
+    updateTask,
+    deleteTask: deleteTaskApi, 
+  } = useTasks();
+
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [showForm, setShowForm] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); 
+  const [formLoading, setFormLoading] = useState(false); 
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
   const handleSaveTask = async (task: Task) => {
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    if (task.id) {
-      setTasks(tasks.map((t) => (t.id === task.id ? task : t)));
-      toast.success("Task updated successfully!");
+    setFormLoading(true);
+    let result;
+    if (task._id) { 
+      result = await updateTask(task._id, {
+        title: task.title,
+        description: task.description,
+        dueDate: task.dueDate,
+        status: task.status,
+      });
     } else {
-      const newTask = { ...task, id: Date.now().toString() }; 
-      setTasks([...tasks, newTask]);
-      toast.success("Task added successfully!");
+      result = await createTask({
+        title: task.title,
+        description: task.description,
+        dueDate: task.dueDate,
+        status: task.status,
+      });
     }
-    setEditingTask(undefined);
-    setShowForm(false);
-    setIsLoading(false);
+
+    if (result) {
+      setEditingTask(undefined);
+      setShowForm(false);
+    }
+    setFormLoading(false);
   };
 
   const handleEditClick = (task: Task) => {
@@ -40,10 +66,11 @@ export default function TasksPage() {
     setShowForm(true);
   };
 
-  const handleDeleteTask = (id: string) => {
+  const handleDeleteTask = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this task?")) {
-      setTasks(tasks.filter((task) => task.id !== id));
-      toast.success("Task deleted successfully!");
+      setFormLoading(true);
+      await deleteTaskApi(id); 
+      setFormLoading(false);
     }
   };
 
@@ -52,16 +79,32 @@ export default function TasksPage() {
     setShowForm(false);
   };
 
+  if (tasksLoading && tasks.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-700 text-lg">Loading tasks...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <p className="text-red-600 text-lg">Error: {error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
-      <Toaster /> 
+      <Toaster />
       <Nav />
       <div className="container mx-auto p-4">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">Task Management</h1>
 
         <button
           onClick={() => {
-            setEditingTask(undefined); 
+            setEditingTask(undefined);
             setShowForm(true);
           }}
           className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -74,7 +117,7 @@ export default function TasksPage() {
             initialTask={editingTask}
             onSave={handleSaveTask}
             onCancel={handleCancelForm}
-            isLoading={isLoading}
+            isLoading={formLoading} 
           />
         )}
 
@@ -86,7 +129,7 @@ export default function TasksPage() {
             <ul className="space-y-4">
               {tasks.map((task) => (
                 <li
-                  key={task.id}
+                  key={task._id} 
                   className="bg-gray-50 p-4 rounded-md shadow-sm flex justify-between items-center"
                 >
                   <div>
@@ -95,7 +138,7 @@ export default function TasksPage() {
                     </h3>
                     <p className="text-gray-700">{task.description}</p>
                     <p className="text-sm text-gray-500">
-                      Due: {task.dueDate} | Status:{" "}
+                      Due: {new Date(task.dueDate).toLocaleDateString()} | Status:{" "}
                       <span
                         className={`font-medium ${
                           task.status === "completed"
@@ -117,7 +160,7 @@ export default function TasksPage() {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDeleteTask(task.id)}
+                      onClick={() => handleDeleteTask(task._id!)} 
                       className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
                     >
                       Delete
