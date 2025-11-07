@@ -57,9 +57,7 @@ export function useTasks() {
       if (!API_BASE_URL) {
         throw new Error("API base URL is not defined. Cannot fetch tasks.");
       }
-      const response = await axios.get(
-        `${API_BASE_URL.replace("/auth", "")}/task`
-      );
+      const response = await axios.get(`${API_BASE_URL}/task/get-tasks`);
       setTasks(response.data.tasks);
       return response.data.tasks;
     } catch (err) {
@@ -79,7 +77,7 @@ export function useTasks() {
           throw new Error("API base URL is not defined. Cannot create task.");
         }
         const response = await axios.post(
-          `${API_BASE_URL.replace("/auth", "")}/task`,
+          `${API_BASE_URL}/task/create-task`,
           newTask
         );
         const createdTask = response.data.task;
@@ -105,7 +103,7 @@ export function useTasks() {
           throw new Error("API base URL is not defined. Cannot update task.");
         }
         const response = await axios.put(
-          `${API_BASE_URL.replace("/auth", "")}/task/${id}`,
+          `${API_BASE_URL}/task/update-task/${id}`,
           updatedTask
         );
         const returnedTask = response.data.task;
@@ -132,7 +130,7 @@ export function useTasks() {
         if (!API_BASE_URL) {
           throw new Error("API base URL is not defined. Cannot delete task.");
         }
-        await axios.delete(`${API_BASE_URL.replace("/auth", "")}/task/${id}`);
+        await axios.delete(`${API_BASE_URL}/task/delete-task/${id}`);
         setTasks((prevTasks) => prevTasks.filter((task) => task._id !== id));
         toast.success("Task deleted successfully!");
         return true;
