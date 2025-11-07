@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Nav from "../component/Navbar";
 import TaskForm from "../component/TaskForm";
+import Pagination from "../component/Pagination";
 import { Toaster } from "react-hot-toast";
 import { useTasks } from "../lib/hooks/useTasks";
 
@@ -32,9 +33,27 @@ export default function TasksPage() {
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const tasksPerPage = 5;
+
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(tasks.length / tasksPerPage);
+  }, [tasks.length, tasksPerPage]);
+
+  const currentTasks = useMemo(() => {
+    const startIndex = (currentPage - 1) * tasksPerPage;
+    return tasks.slice(startIndex, startIndex + tasksPerPage);
+  }, [tasks, currentPage, tasksPerPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   const handleSaveTask = async (task: Task) => {
     setFormLoading(true);
@@ -60,6 +79,10 @@ export default function TasksPage() {
     if (result) {
       setEditingTask(undefined);
       setShowForm(false);
+
+      if (!task._id) {
+        setCurrentPage(Math.ceil((tasks.length + 1) / tasksPerPage));
+      }
     }
     setFormLoading(false);
   };
@@ -74,6 +97,12 @@ export default function TasksPage() {
       setFormLoading(true);
       await deleteTaskApi(id);
       setFormLoading(false);
+      if (
+        currentPage > Math.ceil((tasks.length - 1) / tasksPerPage) &&
+        currentPage > 1
+      ) {
+        setCurrentPage((prev) => prev - 1);
+      }
     }
   };
 
@@ -132,54 +161,65 @@ export default function TasksPage() {
           {tasks.length === 0 ? (
             <p className="text-gray-600">No tasks yet. Add a new one!</p>
           ) : (
-            <ul className="space-y-4">
-              {tasks.map((task) => (
-                <li
-                  key={task._id}
-                  className="bg-gray-50 p-4 rounded-md shadow-sm flex justify-between items-center"
-                >
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {task.title}
-                    </h3>
-                    <p className="text-gray-700">{task.description}</p>
-                    <p className="text-sm text-gray-500">
-                      Due: {new Date(task.dueDate).toLocaleDateString()} |
-                      Status:{" "}
-                      <span
-                        className={`font-medium ${
-                          task.status === "completed"
-                            ? "text-green-600"
-                            : task.status === "in progress"
-                            ? "text-yellow-600"
-                            : "text-red-600"
-                        }`}
+            <>
+              <ul className="space-y-4">
+                {currentTasks.map((task) => (
+                  <li
+                    key={task._id}
+                    className="bg-gray-50 p-4 rounded-md shadow-sm flex justify-between items-center"
+                  >
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {task.title}
+                      </h3>
+                      <p className="text-gray-700">{task.description}</p>
+                      <p className="text-sm text-gray-500">
+                        Due: {new Date(task.dueDate).toLocaleDateString()} |
+                        Status:{" "}
+                        <span
+                          className={`font-medium ${
+                            task.status === "completed"
+                              ? "text-green-600"
+                              : task.status === "in progress"
+                              ? "text-yellow-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {task.status.charAt(0).toUpperCase() +
+                            task.status.slice(1)}
+                        </span>
+                        {task.assigneeEmail && (
+                          <span> | Assignee: {task.assigneeEmail}</span>
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEditClick(task)}
+                        className="px-3 py-1 bg-yellow-500 text-white text-sm rounded-md hover:bg-yellow-600"
                       >
-                        {task.status.charAt(0).toUpperCase() +
-                          task.status.slice(1)}
-                      </span>
-                      {task.assigneeEmail && (
-                        <span> | Assignee: {task.assigneeEmail}</span>
-                      )}
-                    </p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleEditClick(task)}
-                      className="px-3 py-1 bg-yellow-500 text-white text-sm rounded-md hover:bg-yellow-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteTask(task._id!)}
-                      className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTask(task._id!)}
+                        className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  isLoading={tasksLoading || formLoading}
+                />
+              )}
+            </>
           )}
         </div>
       </div>
