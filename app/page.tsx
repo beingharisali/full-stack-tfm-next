@@ -4,125 +4,138 @@ import { useState } from "react";
 import { useAuthContext } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import toast, { Toaster } from "react-hot-toast";
+
+type RoleType = "user" | "admin" | "agent" | "";
 
 interface FormData {
-	email: string;
-	password: string;
-	role: string;
+  email: string;
+  password: string;
+  role: RoleType;
 }
 
 export default function LoginPage() {
-	// Changed from RegisterPage to LoginPage since this is a login form
-	const { loginUser } = useAuthContext();
-	const router = useRouter();
-	const [formData, setFormData] = useState<FormData>({
-		email: "",
-		password: "",
-		role: "",
-	});
+  const { loginUser } = useAuthContext();
+  const router = useRouter();
 
-	const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<FormData>({
+    email: "",
+    password: "",
+    role: "",
+  });
 
-	function handleChange(
-		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-	) {
-		const name = e.target.name;
-		const value = e.target.value;
-		setFormData((prevData) => ({ ...prevData, [name]: value }));
-	}
+  const [loading, setLoading] = useState(false);
 
-	async function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
 
-		try {
-			setLoading(true);
-			await loginUser(formData.email, formData.password, formData.role as any);
-		} catch (error) {
-			const e = error as { response?: { data?: { msg?: string } } };
-			alert(e.response?.data?.msg || "Login failed");
-			console.error("Login failed:", error);
-		} finally {
-			setLoading(false);
-		}
-	}
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
 
-	return (
-		<div className="min-h-screen flex items-center justify-center bg-gray-100">
-			<div className="bg-white shadow-lg p-8 rounded-xl w-full max-w-sm">
-				<h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+    if (!formData.role) {
+      toast.error("Please select a role!", { position: "top-center" });
+      return;
+    }
 
-				<form className="space-y-4" onSubmit={handleSubmit}>
-					<div className="flex flex-col">
-						<label
-							htmlFor="email"
-							className="text-sm font-medium text-gray-600">
-							Email
-						</label>
-						<input
-							type="email"
-							id="email"
-							name="email"
-							className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-							placeholder="Enter your email"
-							value={formData.email}
-							onChange={handleChange}
-							required
-							disabled={loading}
-						/>
-					</div>
-					<div className="flex flex-col">
-						<label
-							htmlFor="password"
-							className="text-sm font-medium text-gray-600">
-							Password
-						</label>
-						<input
-							type="password"
-							id="password"
-							name="password"
-							className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-							placeholder="Enter your password"
-							value={formData.password}
-							onChange={handleChange}
-							required
-							disabled={loading}
-						/>
-					</div>
-					<div className="flex flex-col">
-						<label htmlFor="role" className="text-sm font-medium text-gray-600">
-							Role
-						</label>
-						<select
-							id="role"
-							name="role"
-							className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-							value={formData.role}
-							onChange={handleChange}
-							required
-							disabled={loading}>
-							<option value="">Select Role</option>
-							<option value="user">User</option>
-							<option value="admin">Admin</option>
-							<option value="agent">Agent</option>
-						</select>
-					</div>
-					<button
-						type="submit"
-						className="w-full bg-blue-600 text-white py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-						disabled={loading}>
-						{loading ? "Logging in..." : "Login"}
-					</button>
-				</form>
+    try {
+      setLoading(true);
+      await loginUser(formData.email, formData.password, formData.role);
+      toast.success("Login Successful 🎉", { position: "top-center" });
+    } catch (error) {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(
+        `Login Failed ❌: ${err.response?.data?.message || "Unknown error"}`,
+        { position: "top-center" }
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
 
-				<p className="text-center text-sm text-gray-600 mt-4">
-					{`Don't`} have an account?{" "}
-					<Link
-						href="/register"
-						className="text-blue-600 font-semibold hover:underline">
-						Register
-					</Link>
-				</p>
-			</div>
-		</div>
-	);
+  return (
+    <>
+      <Toaster position="top-center" reverseOrder={false} />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100">
+        <div className="bg-white shadow-2xl p-10 rounded-2xl w-full max-w-md border border-gray-200">
+          <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-8">
+            Welcome Back
+          </h2>
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-gray-700 mb-1 font-medium">
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 mb-1 font-medium">
+                Password
+              </label>
+              <input
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 mb-1 font-medium">
+                Role
+              </label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition"
+                required
+                disabled={loading}
+              >
+                <option value="">Select Role</option>
+                <option value="user">User</option>
+                <option value="agent">Agent</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+          </form>
+
+          <p className="text-center mt-6 text-gray-600 text-sm">
+            {`Don't`} have an account?{" "}
+            <Link
+              href="/register"
+              className="text-indigo-600 font-semibold hover:underline"
+            >
+              Register
+            </Link>
+          </p>
+        </div>
+      </div>
+    </>
+  );
 }

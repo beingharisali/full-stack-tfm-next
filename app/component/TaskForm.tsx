@@ -33,6 +33,9 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const [status, setStatus] = useState<Task["status"]>(
     initialTask?.status || "pending"
   );
+  const [priority, setPriority] = useState<Task["priority"]>(
+    initialTask?.priority || "medium"
+  );
   const [assigneeEmail, setAssigneeEmail] = useState(
     initialTask?.assigneeEmail || ""
   );
@@ -55,6 +58,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
         description,
         dueDate,
         status,
+        priority,
         assigneeEmail,
       };
       if (initialTask?.id) taskToSave.id = initialTask.id;
@@ -152,8 +156,29 @@ const TaskForm: React.FC<TaskFormProps> = ({
             disabled={isLoading}
           >
             <option value="pending">Pending</option>
-            <option value="in progress">In Progress</option>{" "}
+            <option value="in progress">In Progress</option>
             <option value="completed">Completed</option>
+          </select>
+        </div>
+
+        <div>
+          <label
+            htmlFor="priority"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Priority
+          </label>
+          <select
+            id="priority"
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            value={priority}
+            onChange={(e) => setPriority(e.target.value as Task["priority"])}
+            disabled={isLoading}
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
           </select>
         </div>
 

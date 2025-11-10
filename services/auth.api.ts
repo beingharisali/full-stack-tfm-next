@@ -8,7 +8,7 @@ export async function register(
 	password: string,
 	role?: string
 ): Promise<{ user: User; token: string }> {
-	const res = await http.post("/register", {
+	const res = await http.post("/auth/register", {
 		firstName,
 		lastName,
 		email,
@@ -22,7 +22,7 @@ export async function login(
 	password: string,
 	role?: string
 ): Promise<{ user: User; token: string }> {
-	const res = await http.post("/login", { email, password, role });
+	const res = await http.post("/auth/login", { email, password, role });
 	return res.data;
 }
 
