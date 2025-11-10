@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "app/component/sidebar.jsx", "app/component/page.jsx", "app/component/Navbar.jsx", "app/component/dashboard.jsx", "app/Auth/useAuthhooks.jsx", "app/Auth/protectedRoute.jsx", "app/Auth/lyoutfile.jsx", "app/Auth/authContext.jsx"  ],
+  ],
   "exclude": ["node_modules"]
 }

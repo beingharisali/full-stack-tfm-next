@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 
 interface Task {
@@ -7,7 +7,9 @@ interface Task {
   title: string;
   description: string;
   dueDate: string;
-  status: "pending" | "in-progress" | "completed";
+  status: "pending" | "in progress" | "completed";
+  priority?: "low" | "medium" | "high" | "urgent";
+  assigneeEmail?: string;
 }
 
 interface TaskFormProps {
@@ -24,36 +26,17 @@ const TaskForm: React.FC<TaskFormProps> = ({
   isLoading = false,
 }) => {
   const [title, setTitle] = useState(initialTask?.title || "");
-  const [description, setDescription] = useState(initialTask?.description || "");
+  const [description, setDescription] = useState(
+    initialTask?.description || ""
+  );
   const [dueDate, setDueDate] = useState(initialTask?.dueDate || "");
   const [status, setStatus] = useState<Task["status"]>(
     initialTask?.status || "pending"
   );
+  const [assigneeEmail, setAssigneeEmail] = useState(
+    initialTask?.assigneeEmail || ""
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (
-      initialTask &&
-      (initialTask.title !== title ||
-        initialTask.description !== description ||
-        initialTask.dueDate !== dueDate ||
-        initialTask.status !== status)
-    ) {
-      setTitle(initialTask?.title ?? "");
-      setDescription(initialTask?.description ?? "");
-      setDueDate(initialTask?.dueDate ?? "");
-      setStatus(initialTask?.status ?? "pending");
-      setErrors({});
-    }
-
-    if (!initialTask && (title || description || dueDate)) {
-      setTitle("");
-      setDescription("");
-      setDueDate("");
-      setStatus("pending");
-      setErrors({});
-    }
-  }, [initialTask]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -67,7 +50,13 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      const taskToSave: Task = { title, description, dueDate, status };
+      const taskToSave: Task = {
+        title,
+        description,
+        dueDate,
+        status,
+        assigneeEmail,
+      };
       if (initialTask?.id) taskToSave.id = initialTask.id;
       onSave(taskToSave);
     } else {
@@ -83,7 +72,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
       <h2 className="text-2xl font-bold mb-6 text-gray-800">{formTitle}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="title"
+            className="block text-sm font-medium text-gray-700"
+          >
             Title
           </label>
           <input
@@ -96,11 +88,16 @@ const TaskForm: React.FC<TaskFormProps> = ({
             onChange={(e) => setTitle(e.target.value)}
             disabled={isLoading}
           />
-          {errors.title && <p className="mt-1 text-xs text-red-600">{errors.title}</p>}
+          {errors.title && (
+            <p className="mt-1 text-xs text-red-600">{errors.title}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700"
+          >
             Description
           </label>
           <textarea
@@ -119,7 +116,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
         </div>
 
         <div>
-          <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="dueDate"
+            className="block text-sm font-medium text-gray-700"
+          >
             Due Date
           </label>
           <input
@@ -132,11 +132,16 @@ const TaskForm: React.FC<TaskFormProps> = ({
             onChange={(e) => setDueDate(e.target.value)}
             disabled={isLoading}
           />
-          {errors.dueDate && <p className="mt-1 text-xs text-red-600">{errors.dueDate}</p>}
+          {errors.dueDate && (
+            <p className="mt-1 text-xs text-red-600">{errors.dueDate}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="status"
+            className="block text-sm font-medium text-gray-700"
+          >
             Status
           </label>
           <select
@@ -147,9 +152,32 @@ const TaskForm: React.FC<TaskFormProps> = ({
             disabled={isLoading}
           >
             <option value="pending">Pending</option>
-            <option value="in-progress">In Progress</option>
+            <option value="in progress">In Progress</option>
             <option value="completed">Completed</option>
           </select>
+        </div>
+
+        <div>
+          <label
+            htmlFor="assigneeEmail"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Assignee Email
+          </label>
+          <input
+            type="email"
+            id="assigneeEmail"
+            className={`mt-1 block w-full px-3 py-2 border ${
+              errors.assigneeEmail ? "border-red-500" : "border-gray-300"
+            } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+            value={assigneeEmail}
+            onChange={(e) => setAssigneeEmail(e.target.value)}
+            disabled={isLoading}
+            placeholder="user@example.com"
+          />
+          {errors.assigneeEmail && (
+            <p className="mt-1 text-xs text-red-600">{errors.assigneeEmail}</p>
+          )}
         </div>
 
         <div className="flex justify-end space-x-3">
