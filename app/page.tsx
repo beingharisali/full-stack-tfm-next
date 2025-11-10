@@ -44,11 +44,10 @@ export default function LoginPage() {
       setLoading(true);
       await loginUser(formData.email, formData.password, formData.role);
       toast.success("Login Successful 🎉", { position: "top-center" });
-      router.push("/");
     } catch (error) {
-      const err = error as { response?: { data?: { msg?: string } } };
+      const err = error as { response?: { data?: { message?: string } } };
       toast.error(
-        `Login Failed ❌: ${err.response?.data?.msg || "Unknown error"}`,
+        `Login Failed ❌: ${err.response?.data?.message || "Unknown error"}`,
         { position: "top-center" }
       );
     } finally {
