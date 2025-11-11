@@ -42,9 +42,7 @@ export default function Dashboard() {
         </nav>
       </aside>
 
-      {/* Main Content */}
       <div className="flex flex-col flex-1">
-        {/* Topbar */}
         <header className="flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm">
           <button
             className="md:hidden"
@@ -58,7 +56,6 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Content Area */}
         <main className="flex-1 p-6 overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6 bg-white rounded-xl shadow">Widget 1</div>

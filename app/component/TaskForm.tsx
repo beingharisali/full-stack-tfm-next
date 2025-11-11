@@ -1,19 +1,20 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 interface Task {
-  id?: string;
+  _id?: string;
   title: string;
   description: string;
   dueDate: string;
   status: "pending" | "in progress" | "completed";
   priority?: "low" | "medium" | "high" | "urgent";
-  assigneeEmail?: string;
+  assigneeEmail: string;
+  assigneeName?: string;
 }
 
 interface TaskFormProps {
-  initialTask?: Task;
+  initialTask: Task;
   onSave: (task: Task) => void;
   onCancel: () => void;
   isLoading?: boolean;
@@ -39,13 +40,31 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const [assigneeEmail, setAssigneeEmail] = useState(
     initialTask?.assigneeEmail || ""
   );
+  const [assigneeName, setAssigneeName] = useState(
+    initialTask?.assigneeName || ""
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    setTitle(initialTask?.title || "");
+    setDescription(initialTask?.description || "");
+    setDueDate(initialTask?.dueDate || "");
+    setStatus(initialTask?.status || "pending");
+    setPriority(initialTask?.priority || "medium");
+    setAssigneeEmail(initialTask?.assigneeEmail || "");
+    setAssigneeName(initialTask?.assigneeName || "");
+    setErrors({});
+  }, [initialTask]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!title.trim()) newErrors.title = "Title is required.";
     if (!description.trim()) newErrors.description = "Description is required.";
     if (!dueDate) newErrors.dueDate = "Due Date is required.";
+    if (!assigneeEmail.trim())
+      newErrors.assigneeEmail = "Assignee Email is required.";
+    else if (!/\S+@\S+\.\S+/.test(assigneeEmail))
+      newErrors.assigneeEmail = "Invalid email format.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -60,19 +79,20 @@ const TaskForm: React.FC<TaskFormProps> = ({
         status,
         priority,
         assigneeEmail,
+        assigneeName,
       };
-      if (initialTask?.id) taskToSave.id = initialTask.id;
+      if (initialTask?._id) taskToSave._id = initialTask._id;
       onSave(taskToSave);
     } else {
       toast.error("Please correct the errors in the form.");
     }
   };
 
-  const formTitle = initialTask ? "Edit Task" : "Add New Task";
-  const submitButtonText = initialTask ? "Update Task" : "Create Task";
+  const formTitle = initialTask?._id ? "Edit Task" : "Add New Task";
+  const submitButtonText = initialTask?._id ? "Update Task" : "Create Task";
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto my-8">
+    <div className="bg-white">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">{formTitle}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -184,10 +204,34 @@ const TaskForm: React.FC<TaskFormProps> = ({
 
         <div>
           <label
+            htmlFor="assigneeName"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Assignee Name
+          </label>
+          <input
+            type="text"
+            id="assigneeName"
+            className={`mt-1 block w-full px-3 py-2 border ${
+              errors.assigneeName ? "border-red-500" : "border-gray-300"
+            } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+            value={assigneeName}
+            onChange={(e) => setAssigneeName(e.target.value)}
+            disabled={isLoading}
+            placeholder="John Doe"
+          />
+          {errors.assigneeName && (
+            <p className="mt-1 text-xs text-red-600">{errors.assigneeName}</p>
+          )}
+        </div>
+
+        <div>
+          <label
             htmlFor="assigneeEmail"
             className="block text-sm font-medium text-gray-700"
           >
             Assignee Email
+            <span className="text-red-500">*</span>{" "}
           </label>
           <input
             type="email"
@@ -199,6 +243,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
             onChange={(e) => setAssigneeEmail(e.target.value)}
             disabled={isLoading}
             placeholder="user@example.com"
+            required
           />
           {errors.assigneeEmail && (
             <p className="mt-1 text-xs text-red-600">{errors.assigneeEmail}</p>
