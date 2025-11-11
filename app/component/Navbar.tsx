@@ -27,10 +27,6 @@ function Nav() {
           Button
           <svg
             fill="none"
-            // stroke="currentColor"
-            // strokeLinecap="round"
-            // strokeLinejoin="round"
-            // stroke-Width="2"
             className="w-4 h-4 ml-1"
             viewBox="0 0 24 24"
           >

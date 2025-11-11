@@ -10,10 +10,8 @@ interface Task {
   dueDate: string;
   status: "pending" | "in progress" | "completed";
   priority?: "low" | "medium" | "high" | "urgent";
-  assignee?:
-    | { _id: string; firstName: string; lastName: string; email: string }
-    | string;
-  assigneeEmail?: string;
+  assigneeName?: string;
+  assigneeEmail: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -52,8 +50,13 @@ export function useTasks() {
     setError(null);
     try {
       const response = await http.get("/task/get-tasks");
-      setTasks(response.data.tasks);
-      return response.data.tasks;
+      const fetchedTasks: Task[] = response.data.tasks.map((task: any) => ({
+        ...task,
+        assigneeEmail: task.assigneeEmail || "",
+        assigneeName: task.assigneeName || "",
+      }));
+      setTasks(fetchedTasks);
+      return fetchedTasks;
     } catch (err) {
       handleApiError(err, "Failed to fetch tasks.");
       return [];
@@ -64,18 +67,21 @@ export function useTasks() {
 
   const createTask = useCallback(
     async (
-      newTask: Omit<Task, "_id" | "createdAt" | "updatedAt" | "assignee"> & {
-        assigneeEmail?: string;
-      }
+      newTask: Omit<Task, "_id" | "createdAt" | "updatedAt">
     ) => {
       setLoading(true);
       setError(null);
       try {
         const response = await http.post("/task/create-task", newTask);
         const createdTask = response.data.task;
-        setTasks((prevTasks) => [...prevTasks, createdTask]);
+        const mappedCreatedTask: Task = {
+          ...createdTask,
+          assigneeEmail: createdTask.assigneeEmail || "",
+          assigneeName: createdTask.assigneeName || "",
+        };
+        setTasks((prevTasks) => [...prevTasks, mappedCreatedTask]);
         toast.success("Task created successfully!");
-        return createdTask;
+        return mappedCreatedTask;
       } catch (err) {
         handleApiError(err, "Failed to create task.");
         return null;
@@ -87,20 +93,22 @@ export function useTasks() {
   );
 
   const updateTask = useCallback(
-    async (
-      id: string,
-      updatedTask: Partial<Omit<Task, "assignee">> & { assigneeEmail?: string }
-    ) => {
+    async (id: string, updatedTask: Partial<Omit<Task, "_id" | "createdAt" | "updatedAt">>) => {
       setLoading(true);
       setError(null);
       try {
         const response = await http.put(`/task/update-task/${id}`, updatedTask);
         const returnedTask = response.data.task;
+        const mappedReturnedTask: Task = {
+          ...returnedTask,
+          assigneeEmail: returnedTask.assigneeEmail || "",
+          assigneeName: returnedTask.assigneeName || "",
+        };
         setTasks((prevTasks) =>
-          prevTasks.map((task) => (task._id === id ? returnedTask : task))
+          prevTasks.map((task) => (task._id === id ? mappedReturnedTask : task))
         );
         toast.success("Task updated successfully!");
-        return returnedTask;
+        return mappedReturnedTask;
       } catch (err) {
         handleApiError(err, "Failed to update task.");
         return null;

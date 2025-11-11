@@ -3,7 +3,6 @@ import React from "react";
 function Sidebar() {
   return (
     <div>
-      {/* Toggle Button */}
       <button
         data-drawer-target="default-sidebar"
         data-drawer-toggle="default-sidebar"
@@ -96,7 +95,6 @@ function Sidebar() {
           </ul>
         </div>
       </aside>
-      
     </div>
   );
 }

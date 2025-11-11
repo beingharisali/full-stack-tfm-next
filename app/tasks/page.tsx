@@ -6,6 +6,7 @@ import TaskForm from "../component/TaskForm";
 import Pagination from "../component/Pagination";
 import { Toaster } from "react-hot-toast";
 import { useTasks } from "../lib/hooks/useTasks";
+import Modal from "../component/modal";
 
 interface Task {
   _id?: string;
@@ -14,10 +15,8 @@ interface Task {
   dueDate: string;
   status: "pending" | "in progress" | "completed";
   priority?: "low" | "medium" | "high" | "urgent";
-  assignee?:
-    | { _id: string; firstName: string; lastName: string; email: string }
-    | string;
-  assigneeEmail?: string;
+  assigneeName?: string;
+  assigneeEmail: string;
 }
 
 export default function TasksPage() {
@@ -32,12 +31,12 @@ export default function TasksPage() {
   } = useTasks();
 
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
-  const [showForm, setShowForm] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
 
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterPriority, setFilterPriority] = useState<string>("all");
-  const [searchAssignee, setSearchAssignee] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const tasksPerPage = 5;
@@ -48,31 +47,40 @@ export default function TasksPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterStatus, filterPriority, searchAssignee]);
+  }, [filterStatus, filterPriority, searchQuery]);
+
+
+  const getAssigneeDisplay = (task: Task) => {
+    if (task.assigneeName) {
+      return task.assigneeName;
+    }
+    return task.assigneeEmail || "Unassigned";
+  };
 
   const filteredTasks = useMemo(() => {
-    const searchTerm = searchAssignee.toLowerCase();
+    const term = searchQuery.toLowerCase();
     return tasks.filter((task) => {
       const matchesStatus =
         filterStatus === "all" || task.status === filterStatus;
       const matchesPriority =
         filterPriority === "all" || task.priority === filterPriority;
 
-      let matchesAssignee = true;
-      if (searchTerm) {
-        const assigneeName =
-          typeof task.assignee === "object" && task.assignee?.firstName
-            ? `${task.assignee.firstName} ${task.assignee.lastName}`.toLowerCase()
-            : "";
+      let matchesSearch = true;
+      if (term) {
+        const assigneeName = task.assigneeName?.toLowerCase() || "";
         const assigneeEmail = task.assigneeEmail?.toLowerCase() || "";
+        const taskTitle = task.title.toLowerCase();
+        const taskDescription = task.description.toLowerCase();
 
-        matchesAssignee =
-          assigneeName.includes(searchTerm) ||
-          assigneeEmail.includes(searchTerm);
+        matchesSearch =
+          assigneeName.includes(term) ||
+          assigneeEmail.includes(term) ||
+          taskTitle.includes(term) ||
+          taskDescription.includes(term);
       }
-      return matchesStatus && matchesPriority && matchesAssignee;
+      return matchesStatus && matchesPriority && matchesSearch;
     });
-  }, [tasks, filterStatus, filterPriority, searchAssignee]);
+  }, [tasks, filterStatus, filterPriority, searchQuery]);
 
   const totalPages = useMemo(() => {
     return Math.ceil(filteredTasks.length / tasksPerPage);
@@ -100,6 +108,7 @@ export default function TasksPage() {
         status: task.status,
         priority: task.priority,
         assigneeEmail: task.assigneeEmail,
+        assigneeName: task.assigneeName,
       });
     } else {
       result = await createTask({
@@ -109,20 +118,25 @@ export default function TasksPage() {
         status: task.status,
         priority: task.priority,
         assigneeEmail: task.assigneeEmail,
+        assigneeName: task.assigneeName,
       });
     }
 
     if (result) {
       setEditingTask(undefined);
-      setShowForm(false);
+      setShowFormModal(false);
       await fetchTasks();
     }
     setFormLoading(false);
   };
 
   const handleEditClick = (task: Task) => {
-    setEditingTask(task);
-    setShowForm(true);
+    setEditingTask({
+      ...task,
+      assigneeEmail: task.assigneeEmail,
+      assigneeName: task.assigneeName || "",
+    });
+    setShowFormModal(true);
   };
 
   const handleDeleteTask = async (id: string) => {
@@ -142,7 +156,7 @@ export default function TasksPage() {
 
   const handleCancelForm = () => {
     setEditingTask(undefined);
-    setShowForm(false);
+    setShowFormModal(false);
   };
 
   const getPriorityTagStyle = (priority?: Task["priority"]) => {
@@ -188,22 +202,32 @@ export default function TasksPage() {
         <button
           onClick={() => {
             setEditingTask(undefined);
-            setShowForm(true);
+            setShowFormModal(true);
           }}
           className="mb-8 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-indigo-800 transition duration-300 ease-in-out transform hover:-translate-y-1"
         >
           Add New Task
         </button>
 
-        {showForm && (
+        <Modal show={showFormModal} onClose={handleCancelForm}>
           <TaskForm
             key={editingTask?._id || "new-task"}
-            initialTask={editingTask}
+            initialTask={
+              editingTask || {
+                title: "",
+                description: "",
+                dueDate: "",
+                status: "pending",
+                priority: "medium",
+                assigneeEmail: "",
+                assigneeName: "",
+              }
+            }
             onSave={handleSaveTask}
             onCancel={handleCancelForm}
             isLoading={formLoading}
           />
-        )}
+        </Modal>
 
         <div className="bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-100">
           <h2 className="text-2xl font-bold text-gray-800 mb-5">
@@ -255,18 +279,18 @@ export default function TasksPage() {
 
             <div>
               <label
-                htmlFor="searchAssignee"
+                htmlFor="searchQuery"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Assignee Search
+                Search (Assignee Name/Email, Title, or Description)
               </label>
               <input
                 type="text"
-                id="searchAssignee"
+                id="searchQuery"
                 className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800"
-                placeholder="Search by name or email"
-                value={searchAssignee}
-                onChange={(e) => setSearchAssignee(e.target.value)}
+                placeholder="Search by name, email, title, or description"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 disabled={tasksLoading || formLoading}
               />
             </div>
@@ -334,7 +358,7 @@ export default function TasksPage() {
                               task.priority.slice(1)}
                           </span>
                         )}
-                        {(task.assignee || task.assigneeEmail) && (
+                        {(task.assigneeName || task.assigneeEmail) && (
                           <span className="flex items-center">
                             <svg
                               className="w-4 h-4 mr-1 text-gray-400"
@@ -350,12 +374,7 @@ export default function TasksPage() {
                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                               ></path>
                             </svg>
-                            Assignee:{" "}
-                            {task.assignee &&
-                            typeof task.assignee === "object" &&
-                            "firstName" in task.assignee
-                              ? `${task.assignee.firstName} ${task.assignee.lastName}`
-                              : task.assigneeEmail}
+                            Assignee: {getAssigneeDisplay(task)}
                           </span>
                         )}
                       </div>
