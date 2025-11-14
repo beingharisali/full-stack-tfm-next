@@ -23,10 +23,6 @@ function Nav() {
         </a>
 
         <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
-          <a className="mr-6 hover:text-indigo-200 cursor-pointer transition duration-200">Dashboard</a>
-          <a className="mr-6 hover:text-indigo-200 cursor-pointer transition duration-200">My Tasks</a>
-          <a className="mr-6 hover:text-indigo-200 cursor-pointer transition duration-200">Projects</a>
-          <a className="mr-6 hover:text-indigo-200 cursor-pointer transition duration-200">Team</a>
         </nav>
 
         <button className="inline-flex items-center bg-white text-indigo-700 border-0 py-2 px-4 focus:outline-none hover:bg-indigo-50 rounded-lg font-semibold transition duration-200 mt-4 md:mt-0">
@@ -43,7 +39,7 @@ function Nav() {
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
             />
           </svg>
-          Profile
+          Logout
         </button>
       </div>
     </header>

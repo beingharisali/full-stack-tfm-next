@@ -5,46 +5,51 @@ import Nav from "../component/Navbar";
 import TaskForm from "../component/TaskForm";
 import Pagination from "../component/Pagination";
 import { Toaster } from "react-hot-toast";
-import { useTasks } from "../lib/hooks/useTasks";
-import Modal from "../component/modal";
-
-interface Task {
-  _id?: string;
-  title: string;
-  description: string;
-  dueDate: string;
-  status: "pending" | "in progress" | "completed";
-  priority?: "low" | "medium" | "high" | "urgent";
-  assigneeName?: string;
-  assigneeEmail: string;
-}
+import toast from "react-hot-toast";
+import Modal from "../component/layoutTask";
+import {
+	Task,
+	getTasks,
+	createTask as createTaskApi,
+	updateTask as updateTaskApi,
+	deleteTask as deleteTaskApi,
+} from "@/services/task.api";
 
 export default function TasksPage() {
-  const {
-    tasks,
-    loading: tasksLoading,
-    error,
-    fetchTasks,
-    createTask,
-    updateTask,
-    deleteTask: deleteTaskApi,
-  } = useTasks();
+	const [tasks, setTasks] = useState<Task[]>([]);
+	const [tasksLoading, setTasksLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
-  const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
-  const [showFormModal, setShowFormModal] = useState(false);
-  const [formLoading, setFormLoading] = useState(false);
+	const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
+	const [showFormModal, setShowFormModal] = useState(false);
+	const [formLoading, setFormLoading] = useState(false);
 
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [filterPriority, setFilterPriority] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+	const [filterStatus, setFilterStatus] = useState<string>("all");
+	const [filterPriority, setFilterPriority] = useState<string>("all");
+	const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const tasksPerPage = 5;
-  const [viewMode, setViewMode] = useState<"list" | "kanban">("kanban");
+	const [currentPage, setCurrentPage] = useState(1);
+	const tasksPerPage = 5;
+	const [viewMode, setViewMode] = useState<"list" | "kanban">("kanban");
 
-  useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+	const fetchTasks = async () => {
+		setTasksLoading(true);
+		setError(null);
+		try {
+			const fetchedTasks = await getTasks();
+			setTasks(fetchedTasks);
+		} catch (err: any) {
+			const errorMessage = err.response?.data?.message || err.message || "Failed to fetch tasks";
+			setError(errorMessage);
+			toast.error(errorMessage);
+		} finally {
+			setTasksLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		fetchTasks();
+	}, []);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -58,9 +63,9 @@ export default function TasksPage() {
     return task.assigneeEmail || "Unassigned";
   };
 
-  const filteredTasks = useMemo(() => {
-    const term = searchQuery.toLowerCase();
-    return tasks.filter((task) => {
+	const filteredTasks = useMemo(() => {
+		const term = searchQuery.toLowerCase();
+		return tasks.filter((task: Task) => {
       const matchesStatus =
         filterStatus === "all" || task.status === filterStatus;
       const matchesPriority =
@@ -92,15 +97,15 @@ export default function TasksPage() {
     return filteredTasks.slice(startIndex, startIndex + tasksPerPage);
   }, [filteredTasks, currentPage, tasksPerPage]);
 
-  const kanbanColumns = useMemo(() => {
-    return {
-      pending: filteredTasks.filter((task) => task.status === "pending"),
-      "in progress": filteredTasks.filter(
-        (task) => task.status === "in progress"
-      ),
-      completed: filteredTasks.filter((task) => task.status === "completed"),
-    };
-  }, [filteredTasks]);
+	const kanbanColumns = useMemo(() => {
+		return {
+			pending: filteredTasks.filter((task: Task) => task.status === "pending"),
+			"in progress": filteredTasks.filter(
+				(task: Task) => task.status === "in progress"
+			),
+			completed: filteredTasks.filter((task: Task) => task.status === "completed"),
+		};
+	}, [filteredTasks]);
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData("taskId", taskId);
@@ -110,18 +115,23 @@ export default function TasksPage() {
     e.preventDefault();
   };
 
-  const handleDrop = async (
-    e: React.DragEvent,
-    newStatus: "pending" | "in progress" | "completed"
-  ) => {
-    e.preventDefault();
-    const taskId = e.dataTransfer.getData("taskId");
-    const task = tasks.find((t) => t._id === taskId);
-    if (task && task.status !== newStatus) {
-      await updateTask(taskId, { ...task, status: newStatus });
-      await fetchTasks();
-    }
-  };
+	const handleDrop = async (
+		e: React.DragEvent,
+		newStatus: "pending" | "in progress" | "completed"
+	) => {
+		e.preventDefault();
+		const taskId = e.dataTransfer.getData("taskId");
+		const task = tasks.find((t: Task) => t._id === taskId);
+		if (task && task.status !== newStatus) {
+			try {
+				await updateTaskApi(taskId, { ...task, status: newStatus });
+				await fetchTasks();
+				toast.success("Task updated successfully!");
+			} catch (err: any) {
+				toast.error(err.response?.data?.message || "Failed to update task");
+			}
+		}
+	};
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -129,38 +139,41 @@ export default function TasksPage() {
     }
   };
 
-  const handleSaveTask = async (task: Task) => {
-    setFormLoading(true);
-    let result;
-    if (task._id) {
-      result = await updateTask(task._id, {
-        title: task.title,
-        description: task.description,
-        dueDate: task.dueDate,
-        status: task.status,
-        priority: task.priority,
-        assigneeEmail: task.assigneeEmail,
-        assigneeName: task.assigneeName,
-      });
-    } else {
-      result = await createTask({
-        title: task.title,
-        description: task.description,
-        dueDate: task.dueDate,
-        status: task.status,
-        priority: task.priority,
-        assigneeEmail: task.assigneeEmail,
-        assigneeName: task.assigneeName,
-      });
-    }
-
-    if (result) {
-      setEditingTask(undefined);
-      setShowFormModal(false);
-      await fetchTasks();
-    }
-    setFormLoading(false);
-  };
+	const handleSaveTask = async (task: Task) => {
+		setFormLoading(true);
+		try {
+			if (task._id) {
+				await updateTaskApi(task._id, {
+					title: task.title,
+					description: task.description,
+					dueDate: task.dueDate,
+					status: task.status,
+					priority: task.priority,
+					assigneeEmail: task.assigneeEmail,
+					assigneeName: task.assigneeName,
+				});
+				toast.success("Task updated successfully!");
+			} else {
+				await createTaskApi({
+					title: task.title,
+					description: task.description,
+					dueDate: task.dueDate,
+					status: task.status,
+					priority: task.priority,
+					assigneeEmail: task.assigneeEmail,
+					assigneeName: task.assigneeName,
+				});
+				toast.success("Task created successfully!");
+			}
+			setEditingTask(undefined);
+			setShowFormModal(false);
+			await fetchTasks();
+		} catch (err: any) {
+			toast.error(err.response?.data?.message || "Failed to save task");
+		} finally {
+			setFormLoading(false);
+		}
+	};
 
   const handleEditClick = (task: Task) => {
     setEditingTask({
@@ -171,20 +184,26 @@ export default function TasksPage() {
     setShowFormModal(true);
   };
 
-  const handleDeleteTask = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this task?")) {
-      setFormLoading(true);
-      await deleteTaskApi(id);
-      setFormLoading(false);
-      await fetchTasks();
-      if (
-        currentPage > Math.ceil((filteredTasks.length - 1) / tasksPerPage) &&
-        currentPage > 1
-      ) {
-        setCurrentPage((prev) => prev - 1);
-      }
-    }
-  };
+	const handleDeleteTask = async (id: string) => {
+		if (window.confirm("Are you sure you want to delete this task?")) {
+			setFormLoading(true);
+			try {
+				await deleteTaskApi(id);
+				toast.success("Task deleted successfully!");
+				await fetchTasks();
+				if (
+					currentPage > Math.ceil((filteredTasks.length - 1) / tasksPerPage) &&
+					currentPage > 1
+				) {
+					setCurrentPage((prev) => prev - 1);
+				}
+			} catch (err: any) {
+				toast.error(err.response?.data?.message || "Failed to delete task");
+			} finally {
+				setFormLoading(false);
+			}
+		}
+	};
 
   const handleCancelForm = () => {
     setEditingTask(undefined);
