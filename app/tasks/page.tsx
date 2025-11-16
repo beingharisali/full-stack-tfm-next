@@ -6,7 +6,7 @@ import TaskForm from "../component/TaskForm";
 import Pagination from "../component/Pagination";
 import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
-import Modal from "../component/layoutTask";
+import Modal from "../layouts/layoutTask";
 import {
 	Task,
 	getTasks,
