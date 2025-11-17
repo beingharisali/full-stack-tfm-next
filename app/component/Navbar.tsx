@@ -18,6 +18,7 @@ function Nav() {
     }
   }
 
+  console.log("testing");
   return (
     <header className="bg-linear-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
       <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
@@ -51,11 +52,11 @@ function Nav() {
       </div>
 
       {showLogoutModal && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md"
           onClick={() => setShowLogoutModal(false)}
         >
-          <div 
+          <div
             className="bg-gradient-to-br from-indigo-600 to-purple-700 bg-opacity-95 backdrop-blur-sm border border-white border-opacity-30 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all"
             onClick={(e) => e.stopPropagation()}
           >
@@ -68,13 +69,12 @@ function Nav() {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <p className="text-white text-lg mb-8">
               Are you sure you want to logout?
             </p>
-            
+
             <div className="flex gap-4">
-              
               <button
                 onClick={handleLogout}
                 className="flex-1 px-6 py-3 bg-red-500 bg-opacity-80 backdrop-blur-sm text-white font-semibold rounded-lg hover:bg-red-600 transition-all duration-200"
