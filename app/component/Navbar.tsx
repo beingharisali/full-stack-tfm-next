@@ -18,7 +18,6 @@ function Nav() {
     }
   }
 
-  console.log("testing");
   return (
     <header className="bg-linear-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
       <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
