@@ -56,7 +56,7 @@ function Nav() {
           onClick={() => setShowLogoutModal(false)}
         >
           <div
-            className="bg-gradient-to-br from-indigo-600 to-purple-700 bg-opacity-95 backdrop-blur-sm border border-white border-opacity-30 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all"
+            className="bg-gradient-to-br from-blue-600 to-blue-500 bg-opacity-95 backdrop-blur-sm border border-white border-opacity-30 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
@@ -76,7 +76,7 @@ function Nav() {
             <div className="flex gap-4">
               <button
                 onClick={handleLogout}
-                className="flex-1 px-6 py-3 bg-red-500 bg-opacity-80 backdrop-blur-sm text-white font-semibold rounded-lg hover:bg-red-600 transition-all duration-200"
+                className="flex-1 px-6 py-3 bg-white bg-opacity-80 backdrop-blur-sm text-black font-semibold rounded-lg hover:bg-gray-100 transition-all duration-200"
               >
                 Yes
               </button>
