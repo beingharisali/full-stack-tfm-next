@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { useAuthContext } from "./AuthContext";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -28,6 +29,7 @@ interface SocketProviderProps {
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const { user } = useAuthContext();
 
   useEffect(() => {
     const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:5000", {
@@ -35,11 +37,17 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      autoConnect: true,
     });
 
     socketInstance.on("connect", () => {
       console.log("Socket connected:", socketInstance.id);
       setIsConnected(true);
+      
+      if (user?.id) {
+        socketInstance.emit("join", user.id);
+        console.log("Joined room:", user.id);
+      }
     });
 
     socketInstance.on("disconnect", () => {
@@ -52,13 +60,20 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       setIsConnected(false);
     });
 
+    socketInstance.on("notification", (notification) => {
+      console.log("Notification received:", notification);
+    });
+
     setSocket(socketInstance);
 
     return () => {
+      if (user?.id) {
+        socketInstance.emit("leave", user.id);
+      }
       socketInstance.disconnect();
       socketInstance.removeAllListeners();
     };
-  }, []);
+  }, [user]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>

@@ -27,3 +27,11 @@ export const joinRoom = (socket: Socket | null, roomId: string) => {
 export const sendMessage = (socket: Socket | null, message: any) => {
   emitEvent(socket, "message", message);
 };
+
+export const onNotification = (socket: Socket | null, callback: (notification: any) => void) => {
+  onEvent(socket, "notification", callback);
+};
+
+export const offNotification = (socket: Socket | null) => {
+  offEvent(socket, "notification");
+};
