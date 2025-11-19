@@ -296,7 +296,7 @@ export default function TasksPage() {
             setEditingTask(undefined);
             setShowFormModal(true);
           }}
-          className="mb-8 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-indigo-800 transition duration-300 ease-in-out"
+          className="mb-8 px-6 py-3 bg-linear-to-r from-blue-600 to-indigo-700 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-indigo-800 transition duration-300 ease-in-out"
         >
           Add New Task
         </button>
