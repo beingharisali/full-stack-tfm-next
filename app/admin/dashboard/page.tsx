@@ -4,11 +4,22 @@ import Nav from "@/app/component/Navbar";
 import { getTasks, updateTask, Task } from "@/services/task.api";
 import React, { useEffect, useState } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { ArrowUp } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 function AdminDashboardPage() {
+  const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activityLog, setActivityLog] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  };
 
   async function fetchTasks() {
     setLoading(true);
@@ -64,9 +75,18 @@ function AdminDashboardPage() {
 
       <div className='flex flex-col md:flex-row mx-4 mt-6 gap-6'>
         <div className='md:w-2/3 bg-white shadow-lg rounded-xl p-6'>
-          <h2 className='text-3xl font-bold text-gray-800 mb-4'>
-            Tasks Overview
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className='text-3xl font-bold text-gray-800'>
+              Tasks Overview
+            </h2>
+            {/* Blue Tasks Button */}
+            <button
+              onClick={() => router.push("/tasks")}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
+            >
+              Tasks
+            </button>
+          </div>
 
           {loading ? (
             <p className='text-gray-500'>Loading tasks...</p>
@@ -175,6 +195,15 @@ function AdminDashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Scroll to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className="fixed bottom-8 right-8 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 z-50"
+        aria-label="Scroll to top"
+      >
+        <ArrowUp className="w-6 h-6" />
+      </button>
     </ProtectedRoute>
   );
 }

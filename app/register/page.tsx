@@ -47,6 +47,7 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
+  
   const [loading, setLoading] = useState(false);
 
   function handleChange(

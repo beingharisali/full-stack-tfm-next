@@ -1,21 +1,31 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { LogOut, Bell, ListChecks, X } from "lucide-react";
+import { LogOut, Bell, X } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
 import { getTasks, Task } from "@/services/task.api";
+import { useSocket } from "@/context/SocketContext";
+import { 
+  getUnreadNotificationCount, 
+  markAllNotificationsAsRead,
+  getUserNotifications
+} from "@/services/notification.api";
 
 function Nav() {
-  const { logoutUser } = useAuthContext();
+  const { logoutUser, user } = useAuthContext();
+  const { socket } = useSocket();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [notifications] = useState([
+  const [notifications, setNotifications] = useState<string[]>([
     "New task assigned: Design Dashboard",
     "Task updated: Fix Login Bug",
   ]);
   const [activityLog, setActivityLog] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showActivities, setShowActivities] = useState(false);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+  
+  // Refs for detecting clicks outside
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   async function handleLogout() {
     try {
@@ -26,43 +36,75 @@ function Nav() {
     }
   }
 
-  async function fetchActivities() {
-    try {
-      const tasks: Task[] = await getTasks();
-      const logs: any[] = [];
-
-      tasks.forEach((task: Task) => {
-        logs.push({
-          message: `Task "${task.title}" was created by ${task.assigneeName}`,
-          time: task.createdAt,
-          type: "created",
-          taskId: task._id,
-        });
-
-        if (task.updatedAt !== task.createdAt) {
-          logs.push({
-            message: `Task "${task.title}" was updated by ${task.assigneeName} and status changed to "${task.status}"`,
-            time: task.updatedAt,
-            type: "updated",
-            taskId: task._id,
-          });
-        }
-      });
-
-      logs.sort(
-        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
-      );
-      setActivityLog(logs.slice(0, 10));
-    } catch (err: any) {
-      console.log(
-        err.response?.data?.message || err.message || "Failed to fetch tasks"
-      );
+  // Fetch unread notification count
+  const fetchUnreadNotificationCount = async () => {
+    if (user?.id) {
+      try {
+        const count = await getUnreadNotificationCount(user.id);
+        setHasUnreadNotifications(count > 0);
+      } catch (error) {
+        console.error("Error fetching unread notification count:", error);
+      }
     }
-  }
+  };
 
+  // Mark all notifications as read
+  const markNotificationsAsRead = async () => {
+    if (user?.id) {
+      try {
+        await markAllNotificationsAsRead(user.id);
+        setHasUnreadNotifications(false);
+      } catch (error) {
+        console.error("Error marking notifications as read:", error);
+      }
+    }
+  };
+
+  // Handle clicks outside to close dropdowns
   useEffect(() => {
-    fetchActivities();
+    function handleClickOutside(event: MouseEvent) {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
+
+  // Fetch initial unread notification count
+  useEffect(() => {
+    fetchUnreadNotificationCount();
+  }, [user?.id]);
+
+  // Listen for new notifications via socket
+  useEffect(() => {
+    if (socket) {
+      const handleNewNotification = (notification: any) => {
+        console.log("New notification received:", notification);
+        setHasUnreadNotifications(true);
+      };
+
+      socket.on("notification", handleNewNotification);
+
+      return () => {
+        socket.off("notification", handleNewNotification);
+      };
+    }
+  }, [socket]);
+
+  // Handle notification dropdown visibility
+  const handleNotificationToggle = () => {
+    const newShowState = !showNotifications;
+    setShowNotifications(newShowState);
+    
+    // If opening the notifications dropdown, mark all as read
+    if (newShowState && hasUnreadNotifications) {
+      markNotificationsAsRead();
+    }
+  };
 
   return (
     <header className='bg-linear-to-r from-blue-600 to-indigo-700 text-white shadow-lg relative'>
@@ -87,12 +129,14 @@ function Nav() {
         </Link>
 
         <nav className='md:ml-auto flex items-center gap-6'>
-          <div className='relative'>
+          <div className='relative' ref={notificationRef}>
             <button
-              onClick={() => setShowNotifications(!showNotifications)}
+              onClick={handleNotificationToggle}
               className='relative cursor-pointer bg-white text-indigo-700 p-2 rounded-full hover:bg-indigo-100 transition'>
               <Bell className='w-5 h-5' />
-              <span className='absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full'></span>
+              {hasUnreadNotifications && (
+                <span className='absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full'></span>
+              )}
             </button>
             {showNotifications && (
               <div className='absolute right-0 mt-3 w-64 bg-white/90 backdrop-blur-md shadow-xl rounded-xl p-4 text-black z-50'>
@@ -107,37 +151,6 @@ function Nav() {
                   ))
                 ) : (
                   <p className='text-gray-600'>No new notifications</p>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className='relative'>
-            <button
-              onClick={() => {
-                setShowActivities(!showActivities);
-                if (!showActivities) fetchActivities();
-              }}
-              className='relative cursor-pointer bg-white text-indigo-700 p-2 rounded-full hover:bg-indigo-100 transition'>
-              <ListChecks className='w-5 h-5' />
-            </button>
-            {showActivities && (
-              <div className='absolute right-0 mt-3 w-80 max-h-96 overflow-y-auto bg-white/90 backdrop-blur-md shadow-xl rounded-xl p-4 text-black z-50'>
-                <h3 className='font-bold text-lg mb-3'>Activity Log</h3>
-                {activityLog.length > 0 ? (
-                  activityLog.map((act, index) => (
-                    <Link
-                      key={index}
-                      href={`/activity`}
-                      className='block p-2 mb-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition text-sm'>
-                      {act.message}
-                      <div className='text-xs text-gray-500'>
-                        {new Date(act.time).toLocaleString()}
-                      </div>
-                    </Link>
-                  ))
-                ) : (
-                  <p className='text-gray-600'>No recent activity</p>
                 )}
               </div>
             )}
