@@ -2,12 +2,18 @@
 
 import { useAuthContext } from "@/context/AuthContext";
 import React, { useState } from "react";
-import toast from "react-hot-toast";
-import { LogOut, X } from "lucide-react";
+import { LogOut, X, Bell } from "lucide-react";
 
 function Nav() {
   const { logoutUser } = useAuthContext();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const notifications = [
+    "New task has been assigned",
+    "Your project deadline is tomorrow",
+    "Dashboard report updated",
+  ];
 
   async function handleLogout() {
     try {
@@ -19,7 +25,7 @@ function Nav() {
   }
 
   return (
-    <header className="bg-linear-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
+    <header className="bg-linear-to-r from-blue-600 to-indigo-700 text-white shadow-lg relative">
       <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
         <a className="flex title-font font-medium items-center text-white mb-4 md:mb-0 cursor-pointer">
           <svg
@@ -39,31 +45,67 @@ function Nav() {
           <span className="ml-3 text-2xl font-bold">TaskFlow</span>
         </a>
 
-        <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center"></nav>
+        <nav className="md:ml-auto flex items-center gap-6">
 
-        <button
-          onClick={() => setShowLogoutModal(true)}
-          className="cursor-pointer inline-flex items-center bg-white text-indigo-700 border-0 py-2 px-4 focus:outline-none hover:bg-indigo-50 rounded-lg font-semibold transition duration-200 mt-4 md:mt-0"
-        >
-          <LogOut className="w-5 h-5 mr-2" />
-          Logout
-        </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative cursor-pointer bg-white text-indigo-700 p-2 rounded-full hover:bg-indigo-100 transition"
+            >
+              <Bell className="w-5 h-5" />
+          
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full"></span>
+            </button>
+
+          
+            {showNotifications && (
+              <div
+                className="absolute right-0 mt-3 w-64 bg-white/90 backdrop-blur-md shadow-xl rounded-xl p-4 text-black z-50"
+              >
+                <h3 className="font-bold text-lg mb-3">Notifications</h3>
+
+                {notifications.length > 0 ? (
+                  notifications.map((note, index) => (
+                    <div
+                      key={index}
+                      className="p-2 mb-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                    >
+                      {note}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-600">No new notifications</p>
+                )}
+              </div>
+            )}
+          </div>
+
+        
+          <button
+            onClick={() => setShowLogoutModal(true)}
+            className="cursor-pointer inline-flex items-center bg-white text-indigo-700 py-2 px-4 rounded-lg font-semibold hover:bg-indigo-50 transition"
+          >
+            <LogOut className="w-5 h-5 mr-2" />
+            Logout
+          </button>
+        </nav>
       </div>
 
+    
       {showLogoutModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md"
           onClick={() => setShowLogoutModal(false)}
         >
           <div
-            className="bg-gradient-to-br from-blue-600 to-blue-500 bg-opacity-95 backdrop-blur-sm border border-white border-opacity-30 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all"
+            className="bg-linear-to-br from-blue-600 to-blue-500 bg-opacity-95 backdrop-blur-sm border border-white border-opacity-30 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-white">Confirm Logout</h2>
               <button
                 onClick={() => setShowLogoutModal(false)}
-                className="text-white hover:text-gray-200 transition-colors"
+                className="text-white hover:text-gray-200"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -73,14 +115,12 @@ function Nav() {
               Are you sure you want to logout?
             </p>
 
-            <div className="flex gap-4">
-              <button
-                onClick={handleLogout}
-                className="flex-1 px-6 py-3 bg-white bg-opacity-80 backdrop-blur-sm text-black font-semibold rounded-lg hover:bg-gray-100 transition-all duration-200"
-              >
-                Yes
-              </button>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="w-full px-6 py-3 bg-white bg-opacity-80 text-black font-semibold rounded-lg hover:bg-gray-100 transition"
+            >
+              Yes
+            </button>
           </div>
         </div>
       )}
