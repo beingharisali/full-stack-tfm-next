@@ -6,6 +6,7 @@ import {
 	register as registerApi,
 	login as loginApi,
 	logoutApi,
+	getProfile as getProfileApi,
 } from "../services/auth.api";
 import type { User, UserRole, AuthResponse } from "../types/user";
 
@@ -21,6 +22,7 @@ interface AuthContextType {
 	) => Promise<void>;
 	loginUser: (email: string, password: string, role: UserRole) => Promise<void>;
 	logoutUser: () => Promise<void>;
+	getProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,8 +52,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	};
 
 	useEffect(() => {
-		setLoading(false);
+		const token = localStorage.getItem("token");
+		if (token) {
+			getProfile();
+		} else {
+			setLoading(false);
+		}
 	}, []);
+
+	const getProfile = async () => {
+		try {
+			const profile = await getProfileApi();
+			if (profile) {
+				setUser(profile.user);
+			} else {
+				localStorage.removeItem("token");
+				setUser(null);
+			}
+		} catch (error) {
+			localStorage.removeItem("token");
+			setUser(null);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	const registerUser = async (
 		firstName: string,
@@ -116,6 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				registerUser,
 				loginUser,
 				logoutUser,
+				getProfile,
 			}}>
 			{children}
 		</AuthContext.Provider>

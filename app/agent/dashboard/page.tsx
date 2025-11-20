@@ -3,12 +3,13 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import Nav from "@/app/component/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function page() {
 	const router = useRouter();
 
 	return (
-		<>
+		<ProtectedRoute requiredRole="agent">
 			<Nav />
 			<div className="min-h-screen bg-gray-50 p-8">
 				<h1 className="text-4xl font-bold text-gray-800 mb-8">
@@ -71,6 +72,6 @@ export default function page() {
 					</div>
 				</div>
 			</div>
-		</>
+		</ProtectedRoute>
 	);
 }

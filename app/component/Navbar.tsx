@@ -1,5 +1,8 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { LogOut, Bell, ListChecks, X } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
 import { getTasks, Task } from "@/services/task.api";
 import Link from "next/link";
@@ -9,6 +12,11 @@ import { LogOut, X, Bell, ListChecks } from "lucide-react";
 function Nav() {
   const { logoutUser } = useAuthContext();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [notifications] = useState([
+    "New task assigned: Design Dashboard",
+    "Task updated: Fix Login Bug",
+  ]);
+  const [activityLog, setActivityLog] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showActivities, setShowActivities] = useState(false);
   const [activityLog, setActivityLog] = useState<any[]>([]);
@@ -148,7 +156,7 @@ function Nav() {
             <button
               onClick={() => {
                 setShowActivities(!showActivities);
-                if (!showActivities) fetchActivities(); // refresh on open
+                if (!showActivities) fetchActivities();
               }}
               className='relative cursor-pointer bg-white text-indigo-700 p-2 rounded-full hover:bg-indigo-100 transition'>
               <ListChecks className='w-5 h-5' />
@@ -176,7 +184,6 @@ function Nav() {
             )}
           </div>
 
-          {/* Logout */}
           <button
             onClick={() => setShowLogoutModal(true)}
             className='cursor-pointer inline-flex items-center bg-white text-indigo-700 py-2 px-4 rounded-lg font-semibold hover:bg-indigo-50 transition'>
@@ -186,7 +193,6 @@ function Nav() {
         </nav>
       </div>
 
-      {/* Logout Modal */}
       {showLogoutModal && (
         <div
           className='fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md'

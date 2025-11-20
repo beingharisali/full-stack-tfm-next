@@ -123,7 +123,7 @@ function AdminDashboardPage() {
   };
 
   return (
-    <>
+    <ProtectedRoute requiredRole="admin">
       <Nav />
       <div className='flex flex-col md:flex-row mx-4 mt-6 gap-6'>
         <Modal
@@ -269,7 +269,7 @@ function AdminDashboardPage() {
           )}
         </div>
       </div>
-    </>
+    </ProtectedRoute>
   );
 }
 

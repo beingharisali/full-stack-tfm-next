@@ -14,6 +14,7 @@ import {
   updateTask as updateTaskApi,
   deleteTask as deleteTaskApi,
 } from "@/services/task.api";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -228,67 +229,74 @@ export default function TasksPage() {
 
   if (tasksLoading && tasks.length === 0) {
     return (
-      <div className='min-h-screen bg-gray-100 flex items-center justify-center'>
-        <p className='text-gray-700 text-lg'>Loading tasks...</p>
-      </div>
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+          <p className="text-gray-700 text-lg">Loading tasks...</p>
+        </div>
+      </ProtectedRoute>
     );
   }
 
   if (error) {
     return (
-      <div className='min-h-screen bg-gray-100 flex items-center justify-center'>
-        <p className='text-red-600 text-lg'>Error: {error}</p>
-      </div>
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+          <p className="text-red-600 text-lg">Error: {error}</p>
+        </div>
+      </ProtectedRoute>
     );
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 font-sans'>
-      <Toaster />
-      <Nav />
-      <div className='container mx-auto p-6 md:p-8'>
-        <div className='flex flex-col md:flex-row md:items-center md:justify-between mb-6'>
-          <h1 className='text-4xl font-extrabold text-gray-800 mb-4 md:mb-0'>
-            TaskFlow Management
-          </h1>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50 font-sans">
+        <Toaster />
+        <Nav />
+        <div className="container mx-auto p-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <h1 className="text-4xl font-extrabold text-gray-800 mb-4 md:mb-0">
+              TaskFlow Management
+            </h1>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <select
+                id="filterStatus"
+                className="px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                disabled={tasksLoading || formLoading}
+              >
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="in progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
 
-          <div className='flex flex-col sm:flex-row gap-3'>
-            <select
-              id='filterStatus'
-              className='px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800'
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              disabled={tasksLoading || formLoading}>
-              <option value='all'>All Statuses</option>
-              <option value='pending'>Pending</option>
-              <option value='in progress'>In Progress</option>
-              <option value='completed'>Completed</option>
-            </select>
+              <select
+                id="filterPriority"
+                className="px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800"
+                value={filterPriority}
+                onChange={(e) => setFilterPriority(e.target.value)}
+                disabled={tasksLoading || formLoading}
+              >
+                <option value="all">All Priorities</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
 
-            <select
-              id='filterPriority'
-              className='px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800'
-              value={filterPriority}
-              onChange={(e) => setFilterPriority(e.target.value)}
-              disabled={tasksLoading || formLoading}>
-              <option value='all'>All Priorities</option>
-              <option value='low'>Low</option>
-              <option value='medium'>Medium</option>
-              <option value='high'>High</option>
-              <option value='urgent'>Urgent</option>
-            </select>
-
-            <input
-              type='text'
-              id='searchQuery'
-              className='px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800'
-              placeholder='Search tasks...'
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              disabled={tasksLoading || formLoading}
-            />
+              <input
+                type="text"
+                id="searchQuery"
+                className="px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800"
+                placeholder="Search tasks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                disabled={tasksLoading || formLoading}
+              />
+            </div>
           </div>
-        </div>
 
         {/* REMOVED: Add New Task Button */}
         {/* <button
@@ -413,6 +421,24 @@ export default function TasksPage() {
                             {task.priority.charAt(0).toUpperCase() +
                               task.priority.slice(1)}
                           </span>
+                        </div>
+                        {(task.assigneeName || task.assigneeEmail) && (
+                          <div className="text-xs text-gray-500 mb-3 flex items-center">
+                            <svg
+                              className="w-3 h-3 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                              ></path>
+                            </svg>
+                            {getAssigneeDisplay(task)}
+                          </div>
                         )}
                         <span className='text-xs text-gray-500 flex items-center'>
                           <svg
@@ -457,10 +483,9 @@ export default function TasksPage() {
                           Delete
                         </button>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
               <div
                 className='bg-gray-50 rounded-lg p-4 h-[400px] overflow-y-auto'
@@ -497,6 +522,24 @@ export default function TasksPage() {
                             {task.priority.charAt(0).toUpperCase() +
                               task.priority.slice(1)}
                           </span>
+                        </div>
+                        {(task.assigneeName || task.assigneeEmail) && (
+                          <div className="text-xs text-gray-500 mb-3 flex items-center">
+                            <svg
+                              className="w-3 h-3 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                              ></path>
+                            </svg>
+                            {getAssigneeDisplay(task)}
+                          </div>
                         )}
                         <span className='text-xs text-gray-500 flex items-center'>
                           <svg
@@ -541,10 +584,9 @@ export default function TasksPage() {
                           Delete
                         </button>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
               <div
                 className='bg-gray-50 rounded-lg p-4 h-[400px] overflow-y-auto'
@@ -581,6 +623,24 @@ export default function TasksPage() {
                             {task.priority.charAt(0).toUpperCase() +
                               task.priority.slice(1)}
                           </span>
+                        </div>
+                        {(task.assigneeName || task.assigneeEmail) && (
+                          <div className="text-xs text-gray-500 mb-3 flex items-center">
+                            <svg
+                              className="w-3 h-3 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                              ></path>
+                            </svg>
+                            {getAssigneeDisplay(task)}
+                          </div>
                         )}
                         <span className='text-xs text-gray-500 flex items-center'>
                           <svg
@@ -625,8 +685,8 @@ export default function TasksPage() {
                           Delete
                         </button>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -694,9 +754,64 @@ export default function TasksPage() {
                                 strokeWidth='2'
                                 d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'></path>
                             </svg>
-                            Assignee: {getAssigneeDisplay(task)}
+                            Due: {new Date(task.dueDate).toLocaleDateString()}
                           </span>
-                        )}
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                              task.status === "completed"
+                                ? "bg-green-100 text-green-800"
+                                : task.status === "in progress"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {task.status.charAt(0).toUpperCase() +
+                              task.status.slice(1)}
+                          </span>
+                          {task.priority && (
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getPriorityTagStyle(
+                                task.priority
+                              )}`}
+                            >
+                              {task.priority.charAt(0).toUpperCase() +
+                                task.priority.slice(1)}
+                            </span>
+                          )}
+                          {(task.assigneeName || task.assigneeEmail) && (
+                            <span className="flex items-center">
+                              <svg
+                                className="w-4 h-4 mr-1 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                ></path>
+                              </svg>
+                              Assignee: {getAssigneeDisplay(task)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex space-x-3 mt-3 md:mt-0">
+                        <button
+                          onClick={() => handleEditClick(task)}
+                          className="px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-200"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTask(task._id!)}
+                          className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-200"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </div>
                     <div className='flex space-x-3 mt-3 md:mt-0'>
@@ -715,18 +830,19 @@ export default function TasksPage() {
                 ))}
               </div>
 
-              {totalPages > 0 && (
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                  isLoading={tasksLoading || formLoading}
-                />
-              )}
-            </>
-          )}
+                {totalPages > 0 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                    isLoading={tasksLoading || formLoading}
+                  />
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
