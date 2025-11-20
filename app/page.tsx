@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthContext } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -15,7 +15,7 @@ interface FormData {
 }
 
 export default function LoginPage() {
-  const { loginUser } = useAuthContext();
+  const { loginUser, user } = useAuthContext();
   const router = useRouter();
 
   const [formData, setFormData] = useState<FormData>({
@@ -25,6 +25,24 @@ export default function LoginPage() {
   });
 
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      switch (user.role) {
+        case "admin":
+          router.replace("/admin/dashboard");
+          break;
+        case "agent":
+          router.replace("/agent/dashboard");
+          break;
+        case "user":
+          router.replace("/user/dashboard");
+          break;
+        default:
+          router.replace("/tasks");
+      }
+    }
+  }, [user, router]);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -57,10 +75,6 @@ export default function LoginPage() {
 
   return (
     <>
-      <Toaster
-        position='top-center'
-        reverseOrder={false}
-      />
       <div className='min-h-screen flex items-center justify-center bg-linear-to-r from-indigo-100 via-purple-100 to-pink-100'>
         <div className='bg-white shadow-2xl p-10 rounded-2xl w-full max-w-md border border-gray-200'>
           <h2 className='text-3xl font-extrabold text-center text-gray-800 mb-8'>

@@ -3,6 +3,7 @@
 import Nav from "@/app/component/Navbar";
 import { getTasks, updateTask, Task } from "@/services/task.api";
 import React, { useEffect, useState } from "react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 function AdminDashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -58,7 +59,7 @@ function AdminDashboardPage() {
   };
 
   return (
-    <>
+    <ProtectedRoute requiredRole="admin">
       <Nav />
 
       <div className='flex flex-col md:flex-row mx-4 mt-6 gap-6'>
@@ -174,7 +175,7 @@ function AdminDashboardPage() {
           )}
         </div>
       </div>
-    </>
+    </ProtectedRoute>
   );
 }
 
