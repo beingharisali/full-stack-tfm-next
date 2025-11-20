@@ -1,4 +1,5 @@
 import axios from "axios";
+import { redirect } from "next/navigation";
 
 const baseURL =
 	process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") ||
@@ -11,6 +12,7 @@ const http = axios.create({
 		"Content-Type": "application/json",
 	},
 });
+
 http.interceptors.request.use((config) => {
 	const token =
 		typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -19,5 +21,16 @@ http.interceptors.request.use((config) => {
 	}
 	return config;
 });
+
+http.interceptors.response.use(
+	(response) => response,
+	(error) => {
+		if (typeof window !== "undefined" && error.response?.status === 401) {
+			localStorage.removeItem("token");
+			window.location.href = "/";
+		}
+		return Promise.reject(error);
+	}
+);
 
 export default http;
