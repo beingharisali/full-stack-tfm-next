@@ -3,7 +3,7 @@
 import { useAuthContext } from "@/context/AuthContext";
 import { getTasks, Task } from "@/services/task.api";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { LogOut, X, Bell, ListChecks } from "lucide-react";
 
 function Nav() {
@@ -12,6 +12,9 @@ function Nav() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showActivities, setShowActivities] = useState(false);
   const [activityLog, setActivityLog] = useState<any[]>([]);
+
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const activitiesRef = useRef<HTMLDivElement>(null);
 
   const notifications = [
     "New task has been assigned",
@@ -28,7 +31,6 @@ function Nav() {
     }
   }
 
-  // Fetch tasks and build activity log
   async function fetchActivities() {
     try {
       const tasks: Task[] = await getTasks();
@@ -67,6 +69,26 @@ function Nav() {
     fetchActivities();
   }, []);
 
+  // Close panels when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target as Node)
+      ) {
+        setShowNotifications(false);
+      }
+      if (
+        activitiesRef.current &&
+        !activitiesRef.current.contains(event.target as Node)
+      ) {
+        setShowActivities(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <header className='bg-linear-to-r from-blue-600 to-indigo-700 text-white shadow-lg relative'>
       <div className='container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center'>
@@ -91,13 +113,16 @@ function Nav() {
 
         <nav className='md:ml-auto flex items-center gap-6'>
           {/* Notifications */}
-          <div className='relative'>
+          <div
+            ref={notificationsRef}
+            className='relative'>
             <button
               onClick={() => setShowNotifications(!showNotifications)}
               className='relative cursor-pointer bg-white text-indigo-700 p-2 rounded-full hover:bg-indigo-100 transition'>
               <Bell className='w-5 h-5' />
               <span className='absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full'></span>
             </button>
+
             {showNotifications && (
               <div className='absolute right-0 mt-3 w-64 bg-white/90 backdrop-blur-md shadow-xl rounded-xl p-4 text-black z-50'>
                 <h3 className='font-bold text-lg mb-3'>Notifications</h3>
@@ -117,7 +142,9 @@ function Nav() {
           </div>
 
           {/* Activity Log */}
-          <div className='relative'>
+          <div
+            ref={activitiesRef}
+            className='relative'>
             <button
               onClick={() => {
                 setShowActivities(!showActivities);
@@ -126,6 +153,7 @@ function Nav() {
               className='relative cursor-pointer bg-white text-indigo-700 p-2 rounded-full hover:bg-indigo-100 transition'>
               <ListChecks className='w-5 h-5' />
             </button>
+
             {showActivities && (
               <div className='absolute right-0 mt-3 w-80 max-h-96 overflow-y-auto bg-white/90 backdrop-blur-md shadow-xl rounded-xl p-4 text-black z-50'>
                 <h3 className='font-bold text-lg mb-3'>Activity Log</h3>
