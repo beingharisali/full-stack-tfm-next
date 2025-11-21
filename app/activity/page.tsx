@@ -6,8 +6,11 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { IoMdShareAlt } from "react-icons/io";
 import { MdOutlineStarRate, MdOutlineWatchLater } from "react-icons/md";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 function Page() {
+  const router = useRouter();
   const [taskData, setTasks] = useState<Task[]>([]);
   const [activityLog, setActivityLog] = useState<any[]>([]);
   const [refresh, setRefresh] = useState(false);
@@ -55,6 +58,15 @@ function Page() {
       <Nav />
 
       <div className='mx-4 mt-6'>
+        {/* Back Button */}
+        <button 
+          onClick={() => router.back()}
+          className="flex items-center text-blue-600 hover:text-blue-800 mb-4"
+        >
+          <ArrowLeft className="mr-2" />
+          Back
+        </button>
+
         <h2 className='text-3xl font-bold text-gray-800 mb-4'>Activity Log</h2>
 
         {activityLog.length === 0 ? (

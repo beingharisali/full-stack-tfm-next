@@ -4,13 +4,32 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import Nav from "@/app/component/Navbar";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { ArrowUp, ListChecks } from "lucide-react";
 
 export default function page() {
 	const router = useRouter();
 
+	// Scroll to top function
+	const scrollToTop = () => {
+		window.scrollTo({
+			top: 0,
+			behavior: "smooth"
+		});
+	};
+
 	return (
 		<ProtectedRoute requiredRole="user">
 			<Nav />
+			{/* Activity Log Button Below Navbar */}
+			<div className="flex justify-end p-4 bg-gray-50">
+				<button
+					onClick={() => router.push("/activity")}
+					className="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
+				>
+					<ListChecks className="w-5 h-5 mr-2" />
+					Activity Log
+				</button>
+			</div>
 			<div className="min-h-screen bg-gray-50 p-8">
 				<h1 className="text-4xl font-bold text-gray-800 mb-8">
 					User Dashboard
@@ -72,6 +91,15 @@ export default function page() {
 					</div>
 				</div>
 			</div>
+
+			{/* Scroll to Top Button */}
+			<button
+				onClick={scrollToTop}
+				className="fixed bottom-8 right-8 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 z-50"
+				aria-label="Scroll to top"
+			>
+				<ArrowUp className="w-6 h-6" />
+			</button>
 		</ProtectedRoute>
 	);
 }
