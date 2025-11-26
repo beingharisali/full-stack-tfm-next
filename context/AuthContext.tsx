@@ -52,15 +52,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	};
 
 	useEffect(() => {
-		const token = localStorage.getItem("token");
-		if (token) {
-			getProfile();
-		} else {
-			setLoading(false);
-		}
+		const initializeAuth = async () => {
+			const token = localStorage.getItem("token");
+			if (token) {
+				await getProfile();
+			} else {
+				setLoading(false);
+			}
+		};
+		
+		initializeAuth();
 	}, []);
 
 	const getProfile = async () => {
+		setLoading(true);
 		try {
 			const profile = await getProfileApi();
 			if (profile) {
