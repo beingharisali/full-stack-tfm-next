@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { Plus, Edit3 } from "lucide-react";
 
 interface Task {
   _id?: string;
@@ -92,25 +93,33 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const submitButtonText = initialTask?._id ? "Update Task" : "Create Task";
 
   return (
-    <div className="bg-white">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">{formTitle}</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="bg-white rounded-xl">
+      <div className="flex items-center gap-3 mb-6">
+        {initialTask?._id ? (
+          <Edit3 className="w-6 h-6 text-blue-600" />
+        ) : (
+          <Plus className="w-6 h-6 text-blue-600" />
+        )}
+        <h2 className="text-2xl font-bold text-gray-800">{formTitle}</h2>
+      </div>
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label
             htmlFor="title"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             Title
           </label>
           <input
             type="text"
             id="title"
-            className={`mt-1 block w-full px-3 py-2 border ${
+            className={`w-full px-4 py-3 border ${
               errors.title ? "border-red-500" : "border-gray-300"
-            } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+            } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             disabled={isLoading}
+            placeholder="Enter task title"
           />
           {errors.title && (
             <p className="mt-1 text-xs text-red-600">{errors.title}</p>
@@ -120,19 +129,20 @@ const TaskForm: React.FC<TaskFormProps> = ({
         <div>
           <label
             htmlFor="description"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             Description
           </label>
           <textarea
             id="description"
-            rows={3}
-            className={`mt-1 block w-full px-3 py-2 border ${
+            rows={4}
+            className={`w-full px-4 py-3 border ${
               errors.description ? "border-red-500" : "border-gray-300"
-            } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+            } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition`}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             disabled={isLoading}
+            placeholder="Enter task description"
           ></textarea>
           {errors.description && (
             <p className="mt-1 text-xs text-red-600">{errors.description}</p>
@@ -142,16 +152,16 @@ const TaskForm: React.FC<TaskFormProps> = ({
         <div>
           <label
             htmlFor="dueDate"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             Due Date
           </label>
           <input
             type="date"
             id="dueDate"
-            className={`mt-1 block w-full px-3 py-2 border ${
+            className={`w-full px-4 py-3 border ${
               errors.dueDate ? "border-red-500" : "border-gray-300"
-            } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+            } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition`}
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
             disabled={isLoading}
@@ -161,60 +171,62 @@ const TaskForm: React.FC<TaskFormProps> = ({
           )}
         </div>
 
-        <div>
-          <label
-            htmlFor="status"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Status
-          </label>
-          <select
-            id="status"
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-            value={status}
-            onChange={(e) => setStatus(e.target.value as Task["status"])}
-            disabled={isLoading}
-          >
-            <option value="pending">Pending</option>
-            <option value="in progress">In Progress</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label
+              htmlFor="status"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Status
+            </label>
+            <select
+              id="status"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"
+              value={status}
+              onChange={(e) => setStatus(e.target.value as Task["status"])}
+              disabled={isLoading}
+            >
+              <option value="pending">Pending</option>
+              <option value="in progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
 
-        <div>
-          <label
-            htmlFor="priority"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Priority
-          </label>
-          <select
-            id="priority"
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-            value={priority}
-            onChange={(e) => setPriority(e.target.value as Task["priority"])}
-            disabled={isLoading}
-          >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="urgent">Urgent</option>
-          </select>
+          <div>
+            <label
+              htmlFor="priority"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Priority
+            </label>
+            <select
+              id="priority"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as Task["priority"])}
+              disabled={isLoading}
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
         </div>
 
         <div>
           <label
             htmlFor="assigneeName"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             Assignee Name
           </label>
           <input
             type="text"
             id="assigneeName"
-            className={`mt-1 block w-full px-3 py-2 border ${
+            className={`w-full px-4 py-3 border ${
               errors.assigneeName ? "border-red-500" : "border-gray-300"
-            } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+            } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition`}
             value={assigneeName}
             onChange={(e) => setAssigneeName(e.target.value)}
             disabled={isLoading}
@@ -228,17 +240,16 @@ const TaskForm: React.FC<TaskFormProps> = ({
         <div>
           <label
             htmlFor="assigneeEmail"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Assignee Email
-            <span className="text-red-500">*</span>{" "}
+            Assignee Email <span className="text-red-500">*</span>
           </label>
           <input
             type="email"
             id="assigneeEmail"
-            className={`mt-1 block w-full px-3 py-2 border ${
+            className={`w-full px-4 py-3 border ${
               errors.assigneeEmail ? "border-red-500" : "border-gray-300"
-            } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+            } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition`}
             value={assigneeEmail}
             onChange={(e) => setAssigneeEmail(e.target.value)}
             disabled={isLoading}
@@ -250,21 +261,31 @@ const TaskForm: React.FC<TaskFormProps> = ({
           )}
         </div>
 
-        <div className="flex justify-end space-x-3">
+        <div className="flex justify-end space-x-4 pt-4">
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            className="px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition"
             disabled={isLoading}
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="inline-flex justify-center py-2 px-4 shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 shadow-sm text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
             disabled={isLoading}
           >
-            {isLoading ? "Saving..." : submitButtonText}
+            {isLoading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Saving...
+              </span>
+            ) : (
+              submitButtonText
+            )}
           </button>
         </div>
       </form>

@@ -18,7 +18,7 @@ export default function ProtectedRoute({
 
   useEffect(() => {
     if (!loading) {
-            const timer = setTimeout(() => {
+      const timer = setTimeout(() => {
         if (!user) {
           router.replace("/");
           return;

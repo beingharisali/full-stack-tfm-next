@@ -1,5 +1,4 @@
 import axios from "axios";
-import { redirect } from "next/navigation";
 
 const baseURL =
 	process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") ||
@@ -25,12 +24,8 @@ http.interceptors.request.use((config) => {
 http.interceptors.response.use(
 	(response) => response,
 	(error) => {
-		if (typeof window !== "undefined" && error.response?.status === 401) {
-			localStorage.removeItem("token");
-						if (window.location.pathname !== "/") {
-				window.location.href = "/";
-			}
-		}
+		// Only handle 401 errors specifically in the auth context, not globally
+		// This prevents automatic logout on page refresh due to temporary issues
 		return Promise.reject(error);
 	}
 );
