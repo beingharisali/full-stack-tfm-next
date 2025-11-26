@@ -18,32 +18,36 @@ export default function ProtectedRoute({
 
   useEffect(() => {
     if (!loading) {
-      if (!user) {
-        router.replace("/");
-        return;
-      }
-      
-      if (requiredRole) {
-        const hasAccess = Array.isArray(requiredRole) 
-          ? requiredRole.includes(user.role) 
-          : user.role === requiredRole;
-          
-        if (!hasAccess) {
-          switch (user.role) {
-            case "admin":
-              router.replace("/admin/dashboard");
-              break;
-            case "agent":
-              router.replace("/agent/dashboard");
-              break;
-            case "user":
-              router.replace("/user/dashboard");
-              break;
-            default:
-              router.replace("/");
+            const timer = setTimeout(() => {
+        if (!user) {
+          router.replace("/");
+          return;
+        }
+        
+        if (requiredRole) {
+          const hasAccess = Array.isArray(requiredRole) 
+            ? requiredRole.includes(user.role) 
+            : user.role === requiredRole;
+            
+          if (!hasAccess) {
+            switch (user.role) {
+              case "admin":
+                router.replace("/admin/dashboard");
+                break;
+              case "agent":
+                router.replace("/agent/dashboard");
+                break;
+              case "user":
+                router.replace("/user/dashboard");
+                break;
+              default:
+                router.replace("/");
+            }
           }
         }
-      }
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
   }, [user, loading, requiredRole, router]);
 

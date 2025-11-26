@@ -14,7 +14,7 @@ import {
 	updateTask as updateTaskApi,
 	deleteTask as deleteTaskApi,
 } from "@/services/task.api";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/shared/ProtectedRoute";
 import { ArrowLeft, ArrowUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 

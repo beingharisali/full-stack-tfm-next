@@ -3,7 +3,7 @@
 import Nav from "@/app/component/Navbar";
 import { getTasks, updateTask, Task } from "@/services/task.api";
 import React, { useEffect, useState } from "react";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/shared/ProtectedRoute";
 import { ArrowUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 

@@ -3,13 +3,12 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import Nav from "@/app/component/Navbar";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/shared/ProtectedRoute";
 import { ArrowUp, ListChecks } from "lucide-react";
 
 export default function page() {
 	const router = useRouter();
 
-	// Scroll to top function
 	const scrollToTop = () => {
 		window.scrollTo({
 			top: 0,
@@ -20,7 +19,6 @@ export default function page() {
 	return (
 		<ProtectedRoute requiredRole="agent">
 			<Nav />
-			{/* Activity Log Button Below Navbar */}
 			<div className="flex justify-end p-4 bg-gray-50">
 				<button
 					onClick={() => router.push("/activity")}
@@ -92,7 +90,6 @@ export default function page() {
 				</div>
 			</div>
 
-			{/* Scroll to Top Button */}
 			<button
 				onClick={scrollToTop}
 				className="fixed bottom-8 right-8 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 z-50"

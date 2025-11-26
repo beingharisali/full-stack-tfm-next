@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import Nav from "@/app/component/Navbar";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/shared/ProtectedRoute";
 import { ArrowUp, ListChecks } from "lucide-react";
 
 export default function page() {
