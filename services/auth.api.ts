@@ -30,11 +30,30 @@ export async function getProfile(): Promise<{ user: User } | null> {
   try {
     const res = await http.get("/auth/profile");
     return res.data;
-  } catch {
-    return null;
+  } catch (error: any) {
+    // Handle 401 errors specifically by removing the token
+    if (error.response?.status === 401) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+      }
+      return null;
+    }
+    // For network errors or other issues, we don't want to logout immediately
+    // Just re-throw the error for the calling function to handle appropriately
+    throw error;
   }
 }
 
 export async function logoutApi(): Promise<void> {
-	localStorage.removeItem("token");
+	try {
+		await http.post("/auth/logout");
+	} catch (error) {
+		console.error("Logout API error:", error);
+	} finally {
+		if (typeof window !== "undefined") {
+			localStorage.removeItem("token");
+			// Also remove the stay logged in preference when user explicitly logs out
+			localStorage.removeItem("stayLoggedIn");
+		}
+	}
 }

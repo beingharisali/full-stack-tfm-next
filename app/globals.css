@@ -1,1 +1,49 @@
 @import "tailwindcss";
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .animate-in {
+    animation-duration: 300ms;
+    animation-fill-mode: both;
+  }
+  
+  .fade-in-90 {
+    animation-name: fadeIn;
+    animation-duration: 300ms;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+  
+  .zoom-in-90 {
+    animation-name: zoomIn;
+    animation-duration: 300ms;
+    transform: scale(0.9);
+    animation-fill-mode: forwards;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes zoomIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+}
