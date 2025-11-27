@@ -25,7 +25,6 @@ export default function LoginPage() {
     role: "",
   });
 
-  const [stayLoggedIn, setStayLoggedIn] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -64,11 +63,6 @@ export default function LoginPage() {
       setLoading(true);
       await loginUser(formData.email, formData.password, formData.role);
       toast.success("Login Successful 🎉", { position: "top-center" });
-      
-      // Store the stay logged in preference
-      if (typeof window !== "undefined") {
-        localStorage.setItem("stayLoggedIn", stayLoggedIn.toString());
-      }
     } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
       toast.error(
@@ -162,19 +156,6 @@ export default function LoginPage() {
                     <option value='admin'>Admin</option>
                   </select>
                 </div>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  id="stay-logged-in"
-                  type="checkbox"
-                  checked={stayLoggedIn}
-                  onChange={(e) => setStayLoggedIn(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="stay-logged-in" className="ml-2 text-sm text-gray-700">
-                  Stay logged in until you logout
-                </label>
               </div>
 
               <button
