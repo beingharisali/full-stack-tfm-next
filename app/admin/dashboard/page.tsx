@@ -4,7 +4,7 @@ import Nav from "@/app/component/Navbar";
 import { getTasks, updateTask, Task } from "@/services/task.api";
 import React, { useEffect, useState } from "react";
 import ProtectedRoute from "@/shared/ProtectedRoute";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 function AdminDashboardPage() {
@@ -164,9 +164,19 @@ function AdminDashboardPage() {
         </div>
 
         <div className='md:w-1/3 bg-white shadow-lg rounded-xl p-6'>
-          <h2 className='text-3xl font-bold text-gray-800 mb-4'>
-            Activity Log
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className='text-3xl font-bold text-gray-800'>
+              Activity Log
+            </h2>
+            {/* Profile Icon Button - now redirects to users list */}
+            <button
+              onClick={() => router.push("/admin/users")}
+              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition duration-300"
+              aria-label="View All Users"
+            >
+              <User className="w-5 h-5 text-gray-700" />
+            </button>
+          </div>
           {activityLog.length === 0 ? (
             <p className='text-gray-500 text-sm'>No recent activity found.</p>
           ) : (
