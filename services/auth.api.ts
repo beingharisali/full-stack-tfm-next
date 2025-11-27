@@ -17,6 +17,7 @@ export async function register(
 	});
 	return res.data;
 }
+
 export async function login(
 	email: string,
 	password: string,
@@ -42,6 +43,26 @@ export async function getProfile(): Promise<{ user: User } | null> {
     // Just re-throw the error for the calling function to handle appropriately
     throw error;
   }
+}
+
+export async function updateProfile(
+	firstName?: string,
+	lastName?: string,
+	email?: string,
+	password?: string
+): Promise<{ user: User }> {
+	const res = await http.put("/auth/profile", {
+		firstName,
+		lastName,
+		email,
+		password,
+	});
+	return res.data;
+}
+
+export async function getAllUsers(): Promise<User[]> {
+	const res = await http.get("/auth/users");
+	return res.data.users;
 }
 
 export async function logoutApi(): Promise<void> {
