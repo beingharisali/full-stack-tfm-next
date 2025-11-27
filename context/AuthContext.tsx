@@ -7,6 +7,7 @@ import {
 	login as loginApi,
 	logoutApi,
 	getProfile as getProfileApi,
+	updateProfile as updateProfileApi,
 } from "../services/auth.api";
 import type { User, UserRole, AuthResponse } from "../types/user";
 
@@ -23,6 +24,12 @@ interface AuthContextType {
 	loginUser: (email: string, password: string, role: UserRole) => Promise<void>;
 	logoutUser: () => Promise<void>;
 	getProfile: () => Promise<void>;
+	updateProfile: (
+		firstName?: string,
+		lastName?: string,
+		email?: string,
+		password?: string
+	) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -107,6 +114,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 	};
 
+	const updateProfile = async (
+		firstName?: string,
+		lastName?: string,
+		email?: string,
+		password?: string
+	) => {
+		try {
+			const response = await updateProfileApi(firstName, lastName, email, password);
+			setUser(response.user);
+			
+			// Also update the profile in localStorage if needed
+			if (typeof window !== "undefined") {
+				const token = localStorage.getItem("token");
+				if (token) {
+					// Refresh the profile after update
+					await getProfile();
+				}
+			}
+		} catch (error) {
+			console.error("Error updating profile:", error);
+			throw error;
+		}
+	};
+
 	const registerUser = async (
 		firstName: string,
 		lastName: string,
@@ -184,6 +215,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				loginUser,
 				logoutUser,
 				getProfile,
+				updateProfile,
 			}}>
 			{children}
 		</AuthContext.Provider>
