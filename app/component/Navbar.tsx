@@ -4,12 +4,10 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { LogOut, Bell, X, User } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
-import { getTasks, Task } from "@/services/task.api";
 import { useSocket } from "@/context/SocketContext";
-import { 
-  getUnreadNotificationCount, 
+import {
+  getUnreadNotificationCount,
   markAllNotificationsAsRead,
-  getUserNotifications
 } from "@/services/notification.api";
 import { useRouter } from "next/navigation";
 
@@ -25,8 +23,7 @@ function Nav() {
   const [activityLog, setActivityLog] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
-  
-  // Refs for detecting clicks outside
+
   const notificationRef = useRef<HTMLDivElement>(null);
 
   async function handleLogout() {
@@ -38,7 +35,6 @@ function Nav() {
     }
   }
 
-  // Fetch unread notification count
   const fetchUnreadNotificationCount = async () => {
     if (user?.id) {
       try {
@@ -50,7 +46,6 @@ function Nav() {
     }
   };
 
-  // Mark all notifications as read
   const markNotificationsAsRead = async () => {
     if (user?.id) {
       try {
@@ -62,10 +57,12 @@ function Nav() {
     }
   };
 
-  // Handle clicks outside to close dropdowns
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
         setShowNotifications(false);
       }
     }
@@ -76,12 +73,10 @@ function Nav() {
     };
   }, []);
 
-  // Fetch initial unread notification count
   useEffect(() => {
     fetchUnreadNotificationCount();
   }, [user?.id]);
 
-  // Listen for new notifications via socket
   useEffect(() => {
     if (socket) {
       const handleNewNotification = (notification: any) => {
@@ -97,12 +92,10 @@ function Nav() {
     }
   }, [socket]);
 
-  // Handle notification dropdown visibility
   const handleNotificationToggle = () => {
     const newShowState = !showNotifications;
     setShowNotifications(newShowState);
-    
-    // If opening the notifications dropdown, mark all as read
+
     if (newShowState && hasUnreadNotifications) {
       markNotificationsAsRead();
     }
@@ -145,7 +138,9 @@ function Nav() {
         </Link>
 
         <nav className='md:ml-auto flex items-center gap-6'>
-          <div className='relative' ref={notificationRef}>
+          <div
+            className='relative'
+            ref={notificationRef}>
             <button
               onClick={handleNotificationToggle}
               className='relative cursor-pointer bg-white text-indigo-700 p-2 rounded-full hover:bg-indigo-100 transition'>
