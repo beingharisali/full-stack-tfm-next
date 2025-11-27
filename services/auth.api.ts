@@ -52,8 +52,6 @@ export async function logoutApi(): Promise<void> {
 	} finally {
 		if (typeof window !== "undefined") {
 			localStorage.removeItem("token");
-			// Also remove the stay logged in preference when user explicitly logs out
-			localStorage.removeItem("stayLoggedIn");
 		}
 	}
 }

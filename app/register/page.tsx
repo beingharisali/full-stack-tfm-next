@@ -49,7 +49,6 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
   
-  const [stayLoggedIn, setStayLoggedIn] = useState(true);
   const [loading, setLoading] = useState(false);
 
   function handleChange(
@@ -81,11 +80,6 @@ export default function RegisterPage() {
         formData.role
       );
       toast.success("Registration Successful 🎉", { position: "top-center" });
-      
-      // Store the stay logged in preference
-      if (typeof window !== "undefined") {
-        localStorage.setItem("stayLoggedIn", stayLoggedIn.toString());
-      }
     } catch (error) {
       const err = error as { response?: { data?: { msg?: string } } };
       toast.error(
@@ -245,19 +239,6 @@ export default function RegisterPage() {
                     />
                   </div>
                 </div>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  id="stay-logged-in"
-                  type="checkbox"
-                  checked={stayLoggedIn}
-                  onChange={(e) => setStayLoggedIn(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="stay-logged-in" className="ml-2 text-sm text-gray-700">
-                  Stay logged in until you logout
-                </label>
               </div>
 
               <button
