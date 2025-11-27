@@ -7,6 +7,7 @@ import {
 	login as loginApi,
 	logoutApi,
 	getProfile as getProfileApi,
+	updateProfile as updateProfileApi,
 } from "../services/auth.api";
 import type { User, UserRole, AuthResponse } from "../types/user";
 
@@ -23,6 +24,12 @@ interface AuthContextType {
 	loginUser: (email: string, password: string, role: UserRole) => Promise<void>;
 	logoutUser: () => Promise<void>;
 	getProfile: () => Promise<void>;
+	updateProfile: (
+		firstName?: string,
+		lastName?: string,
+		email?: string,
+		password?: string
+	) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,27 +69,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		};
 		
 		initializeAuth();
-		
-		// Add event listener for beforeunload to check stay logged in preference
-		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-			if (typeof window !== "undefined") {
-				const stayLoggedIn = localStorage.getItem("stayLoggedIn");
-				if (stayLoggedIn === "false") {
-					// If user doesn't want to stay logged in, remove token on browser close
-					localStorage.removeItem("token");
-				}
-			}
-		};
-		
-		if (typeof window !== "undefined") {
-			window.addEventListener("beforeunload", handleBeforeUnload);
-		}
-		
-		return () => {
-			if (typeof window !== "undefined") {
-				window.removeEventListener("beforeunload", handleBeforeUnload);
-			}
-		};
 	}, []);
 
 	const getProfile = async () => {
@@ -104,6 +90,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			// We don't automatically logout on network errors anymore
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const updateProfile = async (
+		firstName?: string,
+		lastName?: string,
+		email?: string,
+		password?: string
+	) => {
+		try {
+			const response = await updateProfileApi(firstName, lastName, email, password);
+			setUser(response.user);
+			
+			// Also update the profile in localStorage if needed
+			if (typeof window !== "undefined") {
+				const token = localStorage.getItem("token");
+				if (token) {
+					// Refresh the profile after update
+					await getProfile();
+				}
+			}
+		} catch (error) {
+			console.error("Error updating profile:", error);
+			throw error;
 		}
 	};
 
@@ -168,8 +178,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			setUser(null);
 			if (typeof window !== "undefined") {
 				localStorage.removeItem("token");
-				// Also remove the stay logged in preference when user explicitly logs out
-				localStorage.removeItem("stayLoggedIn");
 			}
 			router.replace("/");
 		}
@@ -184,6 +192,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				loginUser,
 				logoutUser,
 				getProfile,
+				updateProfile,
 			}}>
 			{children}
 		</AuthContext.Provider>

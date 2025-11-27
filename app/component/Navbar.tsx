@@ -2,17 +2,19 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { LogOut, Bell, X } from "lucide-react";
+import { LogOut, Bell, X, User } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import {
   getUnreadNotificationCount,
   markAllNotificationsAsRead,
 } from "@/services/notification.api";
+import { useRouter } from "next/navigation";
 
 function Nav() {
   const { logoutUser, user } = useAuthContext();
   const { socket } = useSocket();
+  const router = useRouter();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [notifications, setNotifications] = useState<string[]>([
     "New task assigned: Design Dashboard",
@@ -99,6 +101,20 @@ function Nav() {
     }
   };
 
+  // Determine profile link based on user role
+  const getProfileLink = () => {
+    switch (user?.role) {
+      case "admin":
+        return "/admin/profile";
+      case "agent":
+        return "/agent/profile";
+      case "user":
+        return "/user/profile";
+      default:
+        return "/user/profile";
+    }
+  };
+
   return (
     <header className='bg-linear-to-r from-blue-600 to-indigo-700 text-white shadow-lg relative'>
       <div className='container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center'>
@@ -150,6 +166,15 @@ function Nav() {
               </div>
             )}
           </div>
+
+          {/* Profile Icon */}
+          <button
+            onClick={() => router.push(getProfileLink())}
+            className='cursor-pointer bg-white text-indigo-700 p-2 rounded-full hover:bg-indigo-100 transition'
+            aria-label="View Profile">
+            <User className='w-5 h-5' />
+          </button>
+
           <button
             onClick={() => setShowLogoutModal(true)}
             className='cursor-pointer inline-flex items-center bg-white text-indigo-700 py-2 px-4 rounded-lg font-semibold hover:bg-indigo-50 transition'>

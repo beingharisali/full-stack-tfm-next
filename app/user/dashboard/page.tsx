@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import Nav from "@/app/component/Navbar";
 import ProtectedRoute from "@/shared/ProtectedRoute";
-import { ArrowUp, ListChecks } from "lucide-react";
+import { ArrowUp, ListChecks, User } from "lucide-react";
 
 export default function page() {
 	const router = useRouter();
@@ -20,8 +20,16 @@ export default function page() {
 	return (
 		<ProtectedRoute requiredRole="user">
 			<Nav />
-			{/* Activity Log Button Below Navbar */}
-			<div className="flex justify-end p-4 bg-gray-50">
+			{/* Buttons Below Navbar */}
+			<div className="flex justify-between p-4 bg-gray-50">
+				{/* Profile Icon Button */}
+				<button
+					onClick={() => router.push("/user/profile")}
+					className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition duration-300"
+					aria-label="View Profile"
+				>
+					<User className="w-5 h-5 text-gray-700" />
+				</button>
 				<button
 					onClick={() => router.push("/activity")}
 					className="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
