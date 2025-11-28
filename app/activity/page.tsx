@@ -58,12 +58,10 @@ function Page() {
       <Nav />
 
       <div className='mx-4 mt-6'>
-        {/* Back Button */}
-        <button 
+        <button
           onClick={() => router.back()}
-          className="flex items-center text-blue-600 hover:text-blue-800 mb-4"
-        >
-          <ArrowLeft className="mr-2" />
+          className='flex items-center text-blue-600 hover:text-blue-800 mb-4'>
+          <ArrowLeft className='mr-2' />
           Back
         </button>
 

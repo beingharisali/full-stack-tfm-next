@@ -69,27 +69,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		};
 		
 		initializeAuth();
-		
-		// Add event listener for beforeunload to check stay logged in preference
-		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-			if (typeof window !== "undefined") {
-				const stayLoggedIn = localStorage.getItem("stayLoggedIn");
-				if (stayLoggedIn === "false") {
-					// If user doesn't want to stay logged in, remove token on browser close
-					localStorage.removeItem("token");
-				}
-			}
-		};
-		
-		if (typeof window !== "undefined") {
-			window.addEventListener("beforeunload", handleBeforeUnload);
-		}
-		
-		return () => {
-			if (typeof window !== "undefined") {
-				window.removeEventListener("beforeunload", handleBeforeUnload);
-			}
-		};
 	}, []);
 
 	const getProfile = async () => {
@@ -199,8 +178,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			setUser(null);
 			if (typeof window !== "undefined") {
 				localStorage.removeItem("token");
-				// Also remove the stay logged in preference when user explicitly logs out
-				localStorage.removeItem("stayLoggedIn");
 			}
 			router.replace("/");
 		}
