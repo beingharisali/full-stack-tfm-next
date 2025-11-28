@@ -84,10 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				setUser(null);
 			}
 		} catch (error) {
-			// Only remove token and logout if it's definitely an auth error
-			// For network issues or temporary server problems, keep the user logged in
 			console.error("Error fetching profile:", error);
-			// We don't automatically logout on network errors anymore
 		} finally {
 			setLoading(false);
 		}
@@ -103,11 +100,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			const response = await updateProfileApi(firstName, lastName, email, password);
 			setUser(response.user);
 			
-			// Also update the profile in localStorage if needed
 			if (typeof window !== "undefined") {
 				const token = localStorage.getItem("token");
 				if (token) {
-					// Refresh the profile after update
 					await getProfile();
 				}
 			}

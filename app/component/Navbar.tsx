@@ -23,8 +23,10 @@ function Nav() {
   const [activityLog, setActivityLog] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const notificationRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   async function handleLogout() {
     try {
@@ -65,6 +67,13 @@ function Nav() {
       ) {
         setShowNotifications(false);
       }
+      
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setShowProfileModal(false);
+      }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -101,18 +110,8 @@ function Nav() {
     }
   };
 
-  // Determine profile link based on user role
-  const getProfileLink = () => {
-    switch (user?.role) {
-      case "admin":
-        return "/admin/profile";
-      case "agent":
-        return "/agent/profile";
-      case "user":
-        return "/user/profile";
-      default:
-        return "/user/profile";
-    }
+  const handleProfileToggle = () => {
+    setShowProfileModal(!showProfileModal);
   };
 
   return (
@@ -167,13 +166,42 @@ function Nav() {
             )}
           </div>
 
-          {/* Profile Icon */}
-          <button
-            onClick={() => router.push(getProfileLink())}
-            className='cursor-pointer bg-white text-indigo-700 p-2 rounded-full hover:bg-indigo-100 transition'
-            aria-label="View Profile">
-            <User className='w-5 h-5' />
-          </button>
+          <div className='relative' ref={profileRef}>
+            <button
+              onClick={handleProfileToggle}
+              className='cursor-pointer bg-white text-indigo-700 p-2 rounded-full hover:bg-indigo-100 transition'
+              aria-label="View Profile">
+              <User className='w-5 h-5' />
+            </button>
+            
+            {showProfileModal && (
+              <div className='absolute right-0 mt-3 w-80 bg-white/90 backdrop-blur-md shadow-xl rounded-xl p-6 text-black z-50'>
+                <div className='flex items-center mb-6'>
+                  <div className='bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16' />
+                  <div className='ml-4'>
+                    <h3 className='font-bold text-lg'>
+                      {user?.firstName} {user?.lastName}
+                    </h3>
+                    <p className='text-gray-600'>{user?.email}</p>
+                    <span className='inline-block px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 mt-1'>
+                      {user?.role}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className='border-t border-gray-200 pt-4'>
+                  <button
+                    onClick={() => {
+                      setShowProfileModal(false);
+                      router.push("/profile");
+                    }}
+                    className='w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition'>
+                    View Profile
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           <button
             onClick={() => setShowLogoutModal(true)}

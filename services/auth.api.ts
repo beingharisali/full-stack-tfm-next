@@ -57,7 +57,6 @@ export async function updateProfile(
 	return res.data;
 }
 
-// ✅ RESOLVED VERSION
 export async function getAllUsers(): Promise<{ users: User[] }> {
 	const res = await http.get("/auth/users");
 	return res.data;
