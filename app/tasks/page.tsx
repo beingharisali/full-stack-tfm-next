@@ -505,12 +505,11 @@ export default function TasksPage() {
                             className={`px-2 py-1 rounded-full text-xs font-semibold ${getPriorityTagStyle(
                               task.priority
                             )}`}>
-                            {task.priority?.charAt(0).toUpperCase() +
-                              task.priority?.slice(1)}
+                            {task.priority ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) : 'Not Set'}
                           </span>
                         </div>
                         <p className='text-gray-600 text-sm mb-4 line-clamp-2'>
-                          {task.description}
+                          {task.description || 'No description provided'}
                         </p>
                         <div className='flex flex-wrap gap-2 mb-4'>
                           <span className='text-xs text-gray-500 flex items-center'>
@@ -589,12 +588,11 @@ export default function TasksPage() {
                             className={`px-2 py-1 rounded-full text-xs font-semibold ${getPriorityTagStyle(
                               task.priority
                             )}`}>
-                            {task.priority?.charAt(0).toUpperCase() +
-                              task.priority?.slice(1)}
+                            {task.priority ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) : 'Not Set'}
                           </span>
                         </div>
                         <p className='text-gray-600 text-sm mb-4 line-clamp-2'>
-                          {task.description}
+                          {task.description || 'No description provided'}
                         </p>
                         <div className='flex flex-wrap gap-2 mb-4'>
                           <span className='text-xs text-gray-500 flex items-center'>
@@ -673,12 +671,11 @@ export default function TasksPage() {
                             className={`px-2 py-1 rounded-full text-xs font-semibold ${getPriorityTagStyle(
                               task.priority
                             )}`}>
-                            {task.priority?.charAt(0).toUpperCase() +
-                              task.priority?.slice(1)}
+                            {task.priority ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) : 'Not Set'}
                           </span>
                         </div>
                         <p className='text-gray-600 text-sm mb-4 line-clamp-2'>
-                          {task.description}
+                          {task.description || 'No description provided'}
                         </p>
                         <div className='flex flex-wrap gap-2 mb-4'>
                           <span className='text-xs text-gray-500 flex items-center'>
@@ -745,12 +742,11 @@ export default function TasksPage() {
                             className={`px-2 py-1 rounded-full text-xs font-semibold ${getPriorityTagStyle(
                               task.priority
                             )}`}>
-                            {task.priority?.charAt(0).toUpperCase() +
-                              task.priority?.slice(1)}
+                            {task.priority ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) : 'Not Set'}
                           </span>
                         </div>
                         <p className='text-gray-700 mt-1 text-sm'>
-                          {task.description}
+                          {task.description || 'No description provided'}
                         </p>
                         <div className='mt-3 flex flex-wrap items-center gap-3 text-sm'>
                           <span className='flex items-center text-gray-500'>
