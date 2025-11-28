@@ -16,7 +16,6 @@ const Pagination: React.FC<PaginationProps> = ({
 }) => {
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-  // Limit the number of page buttons displayed
   const getPageNumbersToShow = () => {
     if (totalPages <= 5) return pageNumbers;
     

@@ -5,13 +5,11 @@ import {
   getTasks,
   updateTask,
   Task,
-  createTask as createTaskApi,
   deleteTask,
 } from "@/services/task.api";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import TaskForm from "@/app/component/TaskForm";
-import Modal from "@/app/layouts/layoutTask";
 import toast from "react-hot-toast";
 
 import {
@@ -25,12 +23,10 @@ import {
 } from "recharts";
 
 function AdminDashboardPage() {
+  const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activityLog, setActivityLog] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [formLoading, setFormLoading] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
-  const [showFormModal, setShowFormModal] = useState(false);
 
   const [totalTasks, setTotalTasks] = useState(0);
   const [completedTasks, setCompletedTasks] = useState(0);
@@ -107,55 +103,8 @@ function AdminDashboardPage() {
     }
   };
 
-  const handleCreateClick = () => {
-    setEditingTask(undefined);
-    setShowFormModal(true);
-  };
-
-  const handleCancelForm = () => {
-    setEditingTask(undefined);
-    setShowFormModal(false);
-  };
-
-  const handleSaveTask = async (task: Task) => {
-    setFormLoading(true);
-    try {
-      const taskData = {
-        title: task.title,
-        description: task.description,
-        dueDate: task.dueDate,
-        status: task.status,
-        priority: task.priority,
-        assigneeEmail: task.assigneeEmail,
-        assigneeName: task.assigneeName,
-      };
-
-      if (task._id) {
-        await updateTask(task._id, taskData);
-        toast.success("Task updated successfully!");
-      } else {
-        await createTaskApi(taskData);
-        toast.success("Task created successfully!");
-      }
-
-      setEditingTask(undefined);
-      setShowFormModal(false);
-      await fetchTasks();
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || "Failed to save task";
-      toast.error(errorMessage);
-    } finally {
-      setFormLoading(false);
-    }
-  };
-
   const handleEditClick = (task: Task) => {
-    setEditingTask({
-      ...task,
-      assigneeEmail: task.assigneeEmail,
-      assigneeName: task.assigneeName || "",
-    });
-    setShowFormModal(true);
+    console.log("Edit task:", task);
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -183,28 +132,6 @@ function AdminDashboardPage() {
       <Nav />
 
       <div className="flex flex-col md:flex-row mx-4 mt-6 gap-6">
-        {/* Modal for Task Form */}
-        <Modal show={showFormModal} onClose={handleCancelForm}>
-          <TaskForm
-            key={editingTask?._id || "new-task"}
-            initialTask={
-              editingTask || {
-                title: "",
-                description: "",
-                dueDate: "",
-                status: "pending",
-                priority: "medium",
-                assigneeEmail: "",
-                assigneeName: "",
-              }
-            }
-            onSave={handleSaveTask}
-            onCancel={handleCancelForm}
-            isLoading={formLoading}
-          />
-        </Modal>
-
-        {/* Analytics */}
         <div className="md:w-2/3 bg-white shadow-lg rounded-xl p-6">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">Analytics</h2>
 
@@ -244,15 +171,14 @@ function AdminDashboardPage() {
           </BarChart>
         </div>
 
-        {/* Activity Log + Create Task */}
         <div className="md:w-1/3 bg-white shadow-lg rounded-xl p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-3xl font-bold text-gray-800">Tasks Overview</h2>
             <button
-              onClick={handleCreateClick}
+              onClick={() => router.push('/tasks')}
               className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
             >
-              New Task
+              Tasks
             </button>
           </div>
 

@@ -24,8 +24,6 @@ http.interceptors.request.use((config) => {
 http.interceptors.response.use(
 	(response) => response,
 	(error) => {
-		// Only handle 401 errors specifically in the auth context, not globally
-		// This prevents automatic logout on page refresh due to temporary issues
 		return Promise.reject(error);
 	}
 );
