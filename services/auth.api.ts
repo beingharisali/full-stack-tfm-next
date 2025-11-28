@@ -32,15 +32,12 @@ export async function getProfile(): Promise<{ user: User } | null> {
     const res = await http.get("/auth/profile");
     return res.data;
   } catch (error: any) {
-    // Handle 401 errors specifically by removing the token
     if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
       }
       return null;
     }
-    // For network errors or other issues, we don't want to logout immediately
-    // Just re-throw the error for the calling function to handle appropriately
     throw error;
   }
 }
@@ -60,9 +57,10 @@ export async function updateProfile(
 	return res.data;
 }
 
-export async function getAllUsers(): Promise<User[]> {
+// ✅ RESOLVED VERSION
+export async function getAllUsers(): Promise<{ users: User[] }> {
 	const res = await http.get("/auth/users");
-	return res.data.users;
+	return res.data;
 }
 
 export async function logoutApi(): Promise<void> {
