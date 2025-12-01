@@ -17,7 +17,6 @@ import {
 import { useAuthContext } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 
-console.log("testing");
 export default function ProfilePage() {
   const router = useRouter();
   const { user, updateProfile } = useAuthContext();
