@@ -51,6 +51,7 @@ function AdminDashboardPage() {
       setCompletedTasks(completed);
       setPendingTasks(pending);
       setOverdueTasks(overdue);
+      console.log('testing')
 
       const logs: any[] = [];
       fetchedTasks.forEach((task: Task) => {
