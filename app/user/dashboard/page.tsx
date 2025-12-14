@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Nav from "@/app/component/Navbar";
 import ProtectedRoute from "@/shared/ProtectedRoute";
+import ChatWidget from "@/app/component/ChatWidget";
 import { ArrowUp, ListChecks, Clipboard, Clock, CheckCircle, Play, Calendar, User } from "lucide-react";
 import { getTasks, Task } from "@/services/task.api";
 
@@ -285,11 +286,12 @@ export default function page() {
 
 			<button
 				onClick={scrollToTop}
-				className="fixed bottom-8 right-8 bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-3 rounded-full shadow-lg hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 z-50"
+				className="fixed bottom-8 right-8 bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-3 rounded-full shadow-lg hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 z-40"
 				aria-label="Scroll to top"
 			>
 				<ArrowUp className="w-6 h-6" />
 			</button>
+			<ChatWidget />
 		</ProtectedRoute>
 	);
 }

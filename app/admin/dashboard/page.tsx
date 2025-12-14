@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
 import ProtectedRoute from "@/shared/ProtectedRoute";
+import ChatWidget from "@/app/component/ChatWidget";
 
 import toast from "react-hot-toast";
 
@@ -222,6 +223,7 @@ function AdminDashboardPage() {
           )}
         </div>
       </div>
+      <ChatWidget />
     </ProtectedRoute>
   );
 }

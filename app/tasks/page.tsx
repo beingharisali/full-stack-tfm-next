@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Nav from "../component/Navbar";
 import TaskForm from "../component/TaskForm";
 import Pagination from "../component/Pagination";
+import ChatWidget from "../component/ChatWidget";
 import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
 import Modal from "../layouts/layoutTask";
@@ -244,7 +245,6 @@ export default function TasksPage() {
     }
   };
 
-  // Scroll to top function
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -304,7 +304,6 @@ export default function TasksPage() {
         <Toaster />
         <Nav />
         <div className='container mx-auto p-4 md:p-6'>
-          {/* Back Button */}
           <button
             onClick={() => router.back()}
             className='flex items-center text-blue-600 hover:text-blue-800 mb-4 transition-colors'>
@@ -821,13 +820,13 @@ export default function TasksPage() {
           </div>
         </div>
 
-        {/* Scroll to Top Button */}
         <button
           onClick={scrollToTop}
-          className='fixed bottom-8 right-8 bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-3 rounded-full shadow-lg hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 z-50'
+          className='fixed bottom-8 right-8 bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-3 rounded-full shadow-lg hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 z-40'
           aria-label='Scroll to top'>
           <ArrowUp className='w-6 h-6' />
         </button>
+        <ChatWidget />
       </div>
     </ProtectedRoute>
   );
