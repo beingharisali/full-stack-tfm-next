@@ -5,6 +5,8 @@ import { getTasks, updateTask, Task, deleteTask } from "@/services/task.api";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
+import ProtectedRoute from "@/shared/ProtectedRoute";
+import ChatWidget from "@/app/component/ChatWidget";
 
 import toast from "react-hot-toast";
 
@@ -50,6 +52,7 @@ function AdminDashboardPage() {
       setCompletedTasks(completed);
       setPendingTasks(pending);
       setOverdueTasks(overdue);
+      console.log('testing')
 
       const logs: any[] = [];
       fetchedTasks.forEach((task: Task) => {
@@ -125,7 +128,7 @@ function AdminDashboardPage() {
   ];
 
   return (
-    <>
+    <ProtectedRoute requiredRole="admin">
       <Nav />
 
       <div className='flex flex-col md:flex-row mx-4 mt-6 gap-6'>
@@ -220,7 +223,8 @@ function AdminDashboardPage() {
           )}
         </div>
       </div>
-    </>
+      <ChatWidget />
+    </ProtectedRoute>
   );
 }
 
