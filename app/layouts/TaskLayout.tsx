@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useAuthContext } from "../../context/AuthContext";
 import { useWorkspaceContext } from "../../context/WorkspaceContext";
 
-const LayoutTask = ({ children }: { children: React.ReactNode }) => {
+const TaskLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const { user } = useAuthContext();
   const { invitations } = useWorkspaceContext();
@@ -140,4 +140,4 @@ const LayoutTask = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default LayoutTask;
+export default TaskLayout;

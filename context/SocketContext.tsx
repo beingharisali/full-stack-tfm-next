@@ -32,7 +32,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const { user } = useAuthContext();
 
   useEffect(() => {
-    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:5000", {
+    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:5001", {
       transports: ["websocket", "polling"],
       reconnection: true,
       reconnectionAttempts: 5,

@@ -7,7 +7,7 @@ import Pagination from "../component/Pagination";
 import ChatWidget from "../component/ChatWidget";
 import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
-import Modal from "../layouts/layoutTask";
+import Modal from "../component/Modal";
 import {
   Task,
   getTasks,
@@ -35,7 +35,7 @@ export default function TasksPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const tasksPerPage = 5;
-  const [viewMode, setViewMode] = useState<"list" | "kanban">("kanban");
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
 
   const fetchTasks = async () => {
     setTasksLoading(true);

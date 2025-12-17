@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Plus, Edit3 } from "lucide-react";
+import { useWorkspaceContext } from "../../context/WorkspaceContext";
 
 interface Task {
   _id?: string;
@@ -12,6 +13,7 @@ interface Task {
   priority?: "low" | "medium" | "high" | "urgent";
   assigneeEmail: string;
   assigneeName?: string;
+  workspace?: string; 
 }
 
 interface TaskFormProps {
@@ -27,6 +29,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
   onCancel,
   isLoading = false,
 }) => {
+  const { workspaces } = useWorkspaceContext();
   const [title, setTitle] = useState(initialTask?.title || "");
   const [description, setDescription] = useState(
     initialTask?.description || ""
@@ -44,6 +47,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const [assigneeName, setAssigneeName] = useState(
     initialTask?.assigneeName || ""
   );
+  const [workspace, setWorkspace] = useState(initialTask?.workspace || ""); // Add workspace state
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -54,6 +58,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
     setPriority(initialTask?.priority || "medium");
     setAssigneeEmail(initialTask?.assigneeEmail || "");
     setAssigneeName(initialTask?.assigneeName || "");
+    setWorkspace(initialTask?.workspace || "");
     setErrors({});
   }, [initialTask]);
 
@@ -81,6 +86,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
         priority,
         assigneeEmail,
         assigneeName,
+        workspace: workspace || undefined, 
       };
       if (initialTask?._id) taskToSave._id = initialTask._id;
       onSave(taskToSave);
@@ -171,7 +177,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div>
             <label
               htmlFor="status"
@@ -210,6 +216,29 @@ const TaskForm: React.FC<TaskFormProps> = ({
               <option value="medium">Medium</option>
               <option value="high">High</option>
               <option value="urgent">Urgent</option>
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="workspace"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Workspace
+            </label>
+            <select
+              id="workspace"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"
+              value={workspace}
+              onChange={(e) => setWorkspace(e.target.value)}
+              disabled={isLoading || workspaces.length === 0}
+            >
+              <option value="">No workspace</option>
+              {workspaces.map((ws) => (
+                <option key={ws._id} value={ws._id}>
+                  {ws.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>

@@ -11,7 +11,6 @@ export interface Notification {
   updatedAt: string;
 }
 
-// Get user notifications
 export const getUserNotifications = async (userId: string, unreadOnly?: boolean) => {
   try {
     const response = await http.get(`/notifications/user/${userId}`, {
@@ -24,7 +23,6 @@ export const getUserNotifications = async (userId: string, unreadOnly?: boolean)
   }
 };
 
-// Mark a notification as read
 export const markNotificationAsRead = async (notificationId: string) => {
   try {
     const response = await http.patch(`/notifications/${notificationId}/read`);
@@ -35,7 +33,6 @@ export const markNotificationAsRead = async (notificationId: string) => {
   }
 };
 
-// Mark all notifications as read
 export const markAllNotificationsAsRead = async (userId: string) => {
   try {
     const response = await http.patch(`/notifications/user/${userId}/read-all`);
@@ -46,7 +43,6 @@ export const markAllNotificationsAsRead = async (userId: string) => {
   }
 };
 
-// Get unread notification count
 export const getUnreadNotificationCount = async (userId: string) => {
   try {
     const response = await http.get(`/notifications/user/${userId}/unread-count`);
@@ -57,7 +53,6 @@ export const getUnreadNotificationCount = async (userId: string) => {
   }
 };
 
-// Delete a notification
 export const deleteNotification = async (notificationId: string) => {
   try {
     const response = await http.delete(`/notifications/${notificationId}`);

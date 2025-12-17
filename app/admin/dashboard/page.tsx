@@ -180,11 +180,18 @@ function AdminDashboardPage() {
         <div className='md:w-1/3 bg-white shadow-lg rounded-xl p-6'>
           <div className='flex justify-between items-center mb-4'>
             <h2 className='text-3xl font-bold text-gray-800'>Tasks Overview</h2>
-            <button
-              onClick={() => router.push("/tasks")}
-              className='px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition'>
-              Tasks
-            </button>
+            <div className='flex space-x-2'>
+              <button
+                onClick={() => router.push("/tasks")}
+                className='px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition'>
+                Tasks
+              </button>
+              <button
+                onClick={() => router.push("/admin/workspaces")}
+                className='px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition'>
+                Manage Spaces
+              </button>
+            </div>
           </div>
 
           <h3 className='text-2xl font-semibold text-gray-700 mb-4'>

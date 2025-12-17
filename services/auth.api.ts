@@ -62,6 +62,11 @@ export async function getAllUsers(): Promise<{ users: User[] }> {
 	return res.data;
 }
 
+export async function getUserByEmail(email: string): Promise<{ user: User }> {
+	const res = await http.get(`/auth/user-by-email?email=${encodeURIComponent(email)}`);
+	return res.data;
+}
+
 export async function logoutApi(): Promise<void> {
 	try {
 		await http.post("/auth/logout");
