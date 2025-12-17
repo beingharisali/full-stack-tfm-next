@@ -1,37 +1,34 @@
+import React from "react";
+import { AuthProvider } from "../context/AuthContext";
+import { SocketProvider } from "../context/SocketContext";
+import { WorkspaceProvider } from "../context/WorkspaceContext";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
-import { SocketProvider } from "@/context/SocketContext";
 
-const geistSans = Geist({
-	variable: "--font-geist-sans",
-	subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-	variable: "--font-geist-mono",
-	subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "TaskFlow Management",
-	description: "A task management application with role-based access control",
+  title: "TaskFlow Manager",
+  description: "A task management application",
 };
 
 export default function RootLayout({
-	children,
+  children,
 }: Readonly<{
-	children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-	return (
-		<html lang="en">
-			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-				<AuthProvider>
-					<SocketProvider>{children}</SocketProvider>
-				</AuthProvider>
-			</body>
-		</html>
-	);
+  return (
+    <html lang="en">
+      <body className={inter.className}>
+        <AuthProvider>
+          <SocketProvider>
+            <WorkspaceProvider>
+              {children}
+            </WorkspaceProvider>
+          </SocketProvider>
+        </AuthProvider>
+      </body>
+    </html>
+  );
 }

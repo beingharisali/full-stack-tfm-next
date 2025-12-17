@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Nav from "@/app/component/Navbar";
 import ProtectedRoute from "@/shared/ProtectedRoute";
 import ChatWidget from "@/app/component/ChatWidget";
-import { ArrowUp, ListChecks, Activity, Users, Clipboard, Clock, CheckCircle, Play, Calendar, AlertCircle, User, Crown, UserCircle } from "lucide-react";
+import { ArrowUp, ListChecks, Activity, Users, Clipboard, Clock, CheckCircle, Play, Calendar, AlertCircle, User, Crown, UserCircle, Folder } from "lucide-react";
 import { getTasks, Task } from "@/services/task.api";
 
 export default function page() {
@@ -154,13 +154,22 @@ export default function page() {
 							</h1>
 							<p className="text-gray-600 mt-2">Monitor all activities across the platform in real-time</p>
 						</div>
-						<button
-							onClick={() => router.push("/activity")}
-							className="flex items-center bg-gradient-to-r from-green-600 to-teal-700 hover:from-green-700 hover:to-teal-800 text-white font-semibold py-3 px-6 rounded-full transition duration-300 shadow-lg hover:shadow-xl"
-						>
-							<ListChecks className="w-5 h-5 mr-2" />
-							View Full Activity Log
-						</button>
+						<div className="flex gap-2">
+							<button
+								onClick={() => router.push("/agent/spaces")}
+								className="flex items-center bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-semibold py-3 px-6 rounded-full transition duration-300 shadow-lg hover:shadow-xl"
+							>
+								<Folder className="w-5 h-5 mr-2" />
+								My Spaces
+							</button>
+							<button
+								onClick={() => router.push("/activity")}
+								className="flex items-center bg-gradient-to-r from-green-600 to-teal-700 hover:from-green-700 hover:to-teal-800 text-white font-semibold py-3 px-6 rounded-full transition duration-300 shadow-lg hover:shadow-xl"
+							>
+								<ListChecks className="w-5 h-5 mr-2" />
+								View Full Activity Log
+							</button>
+						</div>
 					</div>
 
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">

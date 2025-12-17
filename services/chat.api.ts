@@ -30,6 +30,14 @@ export interface ChatMessage {
   updatedAt: string;
 }
 
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+}
+
 export const sendChatRequest = async (requesterId: string, requesterName: string, recipientEmail: string) => {
   try {
     const response = await http.post("/chat/request", {
@@ -101,6 +109,16 @@ export const deleteMessage = async (messageId: string, userId: string) => {
     return response.data;
   } catch (error) {
     console.error("Error deleting message:", error);
+    throw error;
+  }
+};
+
+export const getOnlineUsers = async () => {
+  try {
+    const response = await http.get("/auth/online-users");
+    return response.data.users as User[];
+  } catch (error) {
+    console.error("Error fetching online users:", error);
     throw error;
   }
 };

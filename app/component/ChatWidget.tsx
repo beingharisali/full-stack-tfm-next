@@ -5,7 +5,14 @@ import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../../context/SocketContext";
 import { useAuthContext } from "../../context/AuthContext";
 import { MessageCircle, X, Send, User, Users, Trash2 } from "lucide-react";
-import { sendChatRequest as apiSendChatRequest, respondToChatRequest, sendPrivateMessage, deleteMessage, getUserChatRequests } from "../../services/chat.api";
+import { 
+  sendChatRequest as apiSendChatRequest, 
+  respondToChatRequest, 
+  sendPrivateMessage, 
+  deleteMessage, 
+  getUserChatRequests,
+  getOnlineUsers as apiGetOnlineUsers
+} from "../../services/chat.api";
 
 interface Message {
   id: string;
@@ -126,6 +133,19 @@ const ChatWidget: React.FC = () => {
       }
     };
 
+    const handleNewConnection = (data: any) => {
+      console.log("New connection established:", data);
+      const connection: ChatConnection = {
+        id: data.connectionId,
+        user1Id: data.user1Id,
+        user2Id: data.user2Id,
+        user1Email: data.user1Email,
+        user2Email: data.user2Email,
+        createdAt: new Date(),
+      };
+      setChatConnections(prev => [...prev, connection]);
+    };
+
     const handleUserOnline = (userId: string) => {
       console.log("User came online:", userId);
     };
@@ -151,6 +171,7 @@ const ChatWidget: React.FC = () => {
     socket.on("message", handleMessage);
     socket.on("chatRequest", handleChatRequest);
     socket.on("chatRequestResponse", handleChatRequestResponse);
+    socket.on("newConnection", handleNewConnection);
     socket.on("chatRequestError", handleChatRequestError);
     socket.on("userOnline", handleUserOnline);
     socket.on("userOffline", handleUserOffline);
@@ -161,6 +182,7 @@ const ChatWidget: React.FC = () => {
       socket.off("message", handleMessage);
       socket.off("chatRequest", handleChatRequest);
       socket.off("chatRequestResponse", handleChatRequestResponse);
+      socket.off("newConnection", handleNewConnection);
       socket.off("chatRequestError", handleChatRequestError);
       socket.off("userOnline", handleUserOnline);
       socket.off("userOffline", handleUserOffline);
@@ -374,12 +396,17 @@ const ChatWidget: React.FC = () => {
           console.error("Error loading chat requests:", error);
         });
       
-      setOnlineUsers([
-        { id: "1", name: "Admin User", role: "admin" },
-        { id: "2", name: "Agent Smith", role: "agent" },
-        { id: "3", name: "Regular User", role: "user" },
-        { id: user.id, name: `${user.firstName} ${user.lastName}`, role: user.role },
-      ]);
+      apiGetOnlineUsers()
+        .then(users => {
+          setOnlineUsers(users.map(user => ({
+            id: user.id,
+            name: `${user.firstName} ${user.lastName}`,
+            role: user.role,
+          })));
+        })
+        .catch(error => {
+          console.error("Error loading online users:", error);
+        });
     }
   }, [user]);
 

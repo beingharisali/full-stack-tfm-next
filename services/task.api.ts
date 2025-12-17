@@ -9,12 +9,18 @@ export interface Task {
 	priority?: "low" | "medium" | "high" | "urgent";
 	assigneeName?: string;
 	assigneeEmail: string;
+	workspace?: string;
 	createdAt?: string;
 	updatedAt?: string;
 }
 
 export async function getTasks(): Promise<Task[]> {
 	const res = await http.get("/task/get-tasks");
+	return res.data.tasks;
+}
+
+export async function getWorkspaceTasks(workspaceId: string): Promise<Task[]> {
+	const res = await http.get(`/task/workspace/${workspaceId}`);
 	return res.data.tasks;
 }
 
@@ -35,4 +41,8 @@ export async function updateTask(
 
 export async function deleteTask(id: string): Promise<void> {
 	await http.delete(`/task/delete-task/${id}`);
+}
+
+export async function leaveWorkspace(workspaceId: string): Promise<void> {
+	await http.delete(`/workspace/leave/${workspaceId}`);
 }

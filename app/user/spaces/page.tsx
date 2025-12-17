@@ -1,0 +1,232 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useAuthContext } from "../../../context/AuthContext";
+import { useWorkspaceContext } from "../../../context/WorkspaceContext";
+import { getWorkspaceTasks, Task, leaveWorkspace } from "../../../services/task.api";
+import ProtectedRoute from "../../../shared/ProtectedRoute";
+import { useRouter } from "next/navigation";
+import WorkspaceInvitation from "../../../app/component/WorkspaceInvitation";
+
+const UserSpacesPage = () => {
+  const { user } = useAuthContext();
+  const { workspaces, invitations, loading: workspaceLoading, refreshWorkspaces } = useWorkspaceContext();
+  const router = useRouter();
+  const [selectedWorkspace, setSelectedWorkspace] = useState("");
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    const fetchWorkspaceTasks = async () => {
+      if (selectedWorkspace) {
+        setLoading(true);
+        try {
+          const workspaceTasks = await getWorkspaceTasks(selectedWorkspace);
+          setTasks(workspaceTasks);
+        } catch (error) {
+          console.error("Error fetching workspace tasks:", error);
+          setTasks([]);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setTasks([]);
+      }
+    };
+
+    fetchWorkspaceTasks();
+  }, [selectedWorkspace]);
+
+  const handleWorkspaceClick = (workspaceId: string) => {
+    router.push(`/user/workspaces/${workspaceId}/tasks`);
+  };
+
+  const handleLeaveWorkspace = async (workspaceId: string) => {
+    if (!confirm("Are you sure you want to leave this workspace?")) return;
+
+    try {
+      await leaveWorkspace(workspaceId);
+      setSuccess("Successfully left the workspace");
+      // Refresh workspaces list
+      await refreshWorkspaces();
+      // If we were viewing the workspace we're leaving, clear selection
+      if (selectedWorkspace === workspaceId) {
+        setSelectedWorkspace("");
+        setTasks([]);
+      }
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to leave workspace");
+      console.error("Error leaving workspace:", err);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed": return "bg-green-100 text-green-800";
+      case "in progress": return "bg-yellow-100 text-yellow-800";
+      case "pending": return "bg-gray-100 text-gray-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "urgent": return "bg-red-100 text-red-800";
+      case "high": return "bg-orange-100 text-orange-800";
+      case "medium": return "bg-yellow-100 text-yellow-800";
+      case "low": return "bg-green-100 text-green-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  if (workspaceLoading) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ProtectedRoute requiredRole="user">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="container mx-auto p-4">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold text-gray-800">My Workspaces</h1>
+            <button
+              onClick={() => router.push("/tasks")}
+              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition">
+              Back to Tasks
+            </button>
+          </div>
+          
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          )}
+          
+          {success && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+              {success}
+            </div>
+          )}
+          
+          <WorkspaceInvitation onInvitationResponse={refreshWorkspaces} />
+
+          {workspaces.length === 0 ? (
+            <div className="bg-white shadow rounded-lg p-6 text-center">
+              <p className="text-gray-600">You haven't been added to any workspaces yet.</p>
+              <p className="text-gray-500 mt-2">Wait for an administrator to invite you to a workspace.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-1">
+                <div className="bg-white shadow rounded-lg p-4">
+                  <h2 className="text-xl font-semibold mb-4">Workspaces</h2>
+                  <div className="space-y-2">
+                    {workspaces.map((workspace) => (
+                      <div
+                        key={workspace._id}
+                        onClick={() => handleWorkspaceClick(workspace._id)}
+                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                          selectedWorkspace === workspace._id
+                            ? "bg-blue-100 border border-blue-300"
+                            : "hover:bg-gray-100"
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium">{workspace.name}</h3>
+                            <p className="text-sm text-gray-600">
+                              {workspace.members.length} member{workspace.members.length !== 1 ? "s" : ""}
+                            </p>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLeaveWorkspace(workspace._id);
+                            }}
+                            className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded hover:bg-red-200 transition"
+                          >
+                            Leave
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-2">
+                <div className="bg-white shadow rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold">
+                      {selectedWorkspace
+                        ? workspaces.find(w => w._id === selectedWorkspace)?.name + " Tasks"
+                        : "Select a workspace to view tasks"}
+                    </h2>
+                  </div>
+
+                  {loading ? (
+                    <div className="flex justify-center items-center h-32">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : tasks.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      {selectedWorkspace
+                        ? "No tasks found in this workspace."
+                        : "Select a workspace to view its tasks."}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {tasks.map((task) => (
+                        <div key={task._id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-medium text-lg">{task.title}</h3>
+                              <p className="text-gray-600 mt-1">{task.description}</p>
+                            </div>
+                            <div className="flex space-x-2">
+                              <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(task.status)}`}>
+                                {task.status}
+                              </span>
+                              <span className={`px-2 py-1 rounded-full text-xs ${getPriorityColor(task.priority || "")}`}>
+                                {task.priority}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex justify-between items-center mt-3">
+                            <div className="text-sm text-gray-500">
+                              {task.assigneeName && (
+                                <span>Assigned to: {task.assigneeName}</span>
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {task.dueDate && (
+                                <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
+};
+
+export default UserSpacesPage;

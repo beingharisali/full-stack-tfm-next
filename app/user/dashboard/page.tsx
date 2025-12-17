@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Nav from "@/app/component/Navbar";
 import ProtectedRoute from "@/shared/ProtectedRoute";
 import ChatWidget from "@/app/component/ChatWidget";
-import { ArrowUp, ListChecks, Clipboard, Clock, CheckCircle, Play, Calendar, User } from "lucide-react";
+import { ArrowUp, ListChecks, Clipboard, Clock, CheckCircle, Play, Calendar, User, Folder } from "lucide-react";
 import { getTasks, Task } from "@/services/task.api";
 
 export default function page() {
@@ -82,13 +82,22 @@ export default function page() {
 							<h1 className="text-3xl md:text-4xl font-bold text-gray-800">User Dashboard</h1>
 							<p className="text-gray-600 mt-2">Welcome back! Here's what's happening with your tasks today.</p>
 						</div>
-						<button
-							onClick={() => router.push("/activity")}
-							className="flex items-center bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 shadow-md"
-						>
-							<ListChecks className="w-5 h-5 mr-2" />
-							Activity Log
-						</button>
+						<div className="flex gap-2">
+							<button
+								onClick={() => router.push("/user/spaces")}
+								className="flex items-center bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 shadow-md"
+							>
+								<Folder className="w-5 h-5 mr-2" />
+								My Spaces
+							</button>
+							<button
+								onClick={() => router.push("/activity")}
+								className="flex items-center bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 shadow-md"
+							>
+								<ListChecks className="w-5 h-5 mr-2" />
+								Activity Log
+							</button>
+						</div>
 					</div>
 
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">

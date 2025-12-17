@@ -2,7 +2,7 @@ import axios from "axios";
 
 const baseURL =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
-  "http://localhost:5000/api" ||
+  "http://localhost:5001/api" ||
   "https://full-stack-tfm-node.onrender.com";
 
 const http = axios.create({
