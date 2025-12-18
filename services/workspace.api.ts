@@ -41,15 +41,19 @@ export const createWorkspace = async (name: string) => {
     const response = await http.post("/workspace/create", { name });
     return response.data.workspace as Workspace;
   } catch (error) {
-
     throw error;
   }
 };
 
-export const inviteMembersToWorkspace = async (workspaceId: string, members: string[]) => {
+export const inviteMembersToWorkspace = async (
+  workspaceId: string,
+  members: string[]
+) => {
   try {
     console.log("Inviting members to workspace:", workspaceId, members);
-    const response = await http.post(`/workspace/invite/${workspaceId}`, { members });
+    const response = await http.post(`/workspace/invite/${workspaceId}`, {
+      members,
+    });
     console.log("Invite response:", response.data);
     return response.data;
   } catch (error) {
@@ -77,7 +81,6 @@ export const getWorkspaceById = async (workspaceId: string) => {
     const response = await http.get(`/workspace/${workspaceId}`);
     return response.data.workspace as Workspace;
   } catch (error) {
-
     throw error;
   }
 };
@@ -95,15 +98,17 @@ export const getWorkspaceInvitations = async () => {
   }
 };
 
-export const respondToInvitation = async (invitationId: string, response: "accepted" | "rejected") => {
+export const respondToInvitation = async (
+  invitationId: string,
+  response: "accepted" | "rejected"
+) => {
   try {
-    const res = await http.post("/workspace/invitations/respond", { 
-      invitationId, 
-      response 
+    const res = await http.post("/workspace/invitations/respond", {
+      invitationId,
+      response,
     });
     return res.data;
   } catch (error) {
-
     throw error;
   }
 };
@@ -113,7 +118,6 @@ export const leaveWorkspace = async (workspaceId: string) => {
     const response = await http.delete(`/workspace/leave/${workspaceId}`);
     return response.data;
   } catch (error) {
-
     throw error;
   }
 };
@@ -123,7 +127,6 @@ export const getWorkspaceTasks = async (workspaceId: string) => {
     const response = await http.get(`/task/workspace/${workspaceId}`);
     return response.data.tasks;
   } catch (error) {
-
     throw error;
   }
 };

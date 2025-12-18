@@ -3,7 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { getAllUsers, getUserByEmail } from "../../../services/auth.api";
-import { createWorkspace, inviteMembersToWorkspace, getUserWorkspaces, Workspace } from "../../../services/workspace.api";
+import {
+  createWorkspace,
+  inviteMembersToWorkspace,
+  getUserWorkspaces,
+  Workspace,
+} from "../../../services/workspace.api";
 import ProtectedRoute from "../../../shared/ProtectedRoute";
 import { useRouter } from "next/navigation";
 
@@ -20,7 +25,7 @@ const WorkspaceManagementPage = () => {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  
+
   useEffect(() => {
     console.log("Workspaces state updated:", workspaces);
   }, [workspaces]);
@@ -35,7 +40,7 @@ const WorkspaceManagementPage = () => {
 
   useEffect(() => {
     console.log("useEffect triggered with user:", user);
-    
+
     const fetchUsers = async () => {
       try {
         const response = await getAllUsers();
@@ -50,12 +55,22 @@ const WorkspaceManagementPage = () => {
       try {
         console.log("Fetching workspaces from API");
         const response = await getUserWorkspaces();
-        console.log("Received workspaces:", response);
-        setWorkspaces(response);
-        console.log("Workspaces set in state:", response);
+        console.log("Received workspaces response:", response);
+        if (response && Array.isArray(response)) {
+          setWorkspaces(response);
+          console.log("Workspaces set in state:", response);
+        } else if (
+          response &&
+          response.workspaces &&
+          Array.isArray(response.workspaces)
+        ) {
+          setWorkspaces(response.workspaces);
+          console.log("Workspaces set in state:", response.workspaces);
+        } else {
+          console.log("Unexpected response format:", response);
+        }
       } catch (err) {
         console.error("Error fetching workspaces:", err);
-        setError("Failed to fetch workspaces");
       }
     };
 
@@ -83,10 +98,13 @@ const WorkspaceManagementPage = () => {
       setWorkspaces([...workspaces, newWorkspace]);
       setWorkspaceName("");
       setSuccess("Workspace created successfully!");
-      
+
       setTimeout(() => setSuccess(""), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to create workspace. Please try again.");
+      setError(
+        err.response?.data?.message ||
+          "Failed to create workspace. Please try again."
+      );
       console.error("Error creating workspace:", err);
     } finally {
       setLoading(false);
@@ -106,13 +124,18 @@ const WorkspaceManagementPage = () => {
     try {
       const response = await getUserByEmail(emailInput);
       setUserFound(response.user);
-      setSuccess(`User found: ${response.user.firstName} ${response.user.lastName}`);
+      setSuccess(
+        `User found: ${response.user.firstName} ${response.user.lastName}`
+      );
     } catch (err: any) {
       setUserFound(null);
       if (err.response?.status === 404) {
         setError("User with this email not found in the system");
       } else {
-        setError(err.response?.data?.message || "Failed to search for user. Please try again.");
+        setError(
+          err.response?.data?.message ||
+            "Failed to search for user. Please try again."
+        );
       }
       console.error("Error searching for user:", err);
     } finally {
@@ -135,10 +158,13 @@ const WorkspaceManagementPage = () => {
       setEmailInput("");
       setUserFound(null);
       setSuccess(`Invitation sent to ${userFound.email} successfully!`);
-      
+
       setTimeout(() => setSuccess(""), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to send invitation. Please try again.");
+      setError(
+        err.response?.data?.message ||
+          "Failed to send invitation. Please try again."
+      );
       console.error("Error inviting member:", err);
     } finally {
       setLoading(false);
@@ -146,9 +172,9 @@ const WorkspaceManagementPage = () => {
   };
 
   const toggleMemberSelection = (userId: string) => {
-    setSelectedMembers(prev => 
-      prev.includes(userId) 
-        ? prev.filter(id => id !== userId) 
+    setSelectedMembers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
         : [...prev, userId]
     );
   };
@@ -171,20 +197,23 @@ const WorkspaceManagementPage = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="container mx-auto p-4">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-800">Workspace Management</h1>
+            <h1 className="text-3xl font-bold text-gray-800">
+              Workspace Management
+            </h1>
             <button
               onClick={() => router.push("/admin/dashboard")}
-              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition">
+              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
+            >
               Back to Dashboard
             </button>
           </div>
-          
+
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
-          
+
           {success && (
             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
               {success}
@@ -193,7 +222,9 @@ const WorkspaceManagementPage = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Create New Workspace</h2>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                Create New Workspace
+              </h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -218,25 +249,31 @@ const WorkspaceManagementPage = () => {
             </div>
 
             <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Existing Workspaces</h2>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                Existing Workspaces
+              </h2>
               {workspaces.length === 0 ? (
                 <p className="text-gray-600">No workspaces created yet.</p>
               ) : (
                 <div className="space-y-3">
                   {workspaces.map((workspace) => (
-                    <div 
-                      key={workspace._id} 
+                    <div
+                      key={workspace._id}
                       className="border rounded-lg p-4 hover:shadow-md transition cursor-pointer"
                       onClick={() => handleWorkspaceClick(workspace._id)}
                     >
                       <div className="flex justify-between items-center">
-                        <h3 className="font-medium text-lg">{workspace.name}</h3>
+                        <h3 className="font-medium text-lg">
+                          {workspace.name}
+                        </h3>
                         <span className="text-sm text-gray-500">
-                          {workspace.members.length} member{workspace.members.length !== 1 ? "s" : ""}
+                          {workspace.members.length} member
+                          {workspace.members.length !== 1 ? "s" : ""}
                         </span>
                       </div>
                       <p className="text-sm text-gray-500 mt-1">
-                        Created: {new Date(workspace.createdAt).toLocaleDateString()}
+                        Created:{" "}
+                        {new Date(workspace.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   ))}
@@ -246,8 +283,10 @@ const WorkspaceManagementPage = () => {
           </div>
 
           <div className="bg-white shadow rounded-lg p-6 mt-6">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Invite Member to Workspace</h2>
-            
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+              Invite Member to Workspace
+            </h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -288,13 +327,17 @@ const WorkspaceManagementPage = () => {
                       Search
                     </button>
                   </div>
-                  
+
                   {userFound && (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="font-medium">{userFound.firstName} {userFound.lastName}</p>
-                          <p className="text-sm text-gray-600">{userFound.email} ({userFound.role})</p>
+                          <p className="font-medium">
+                            {userFound.firstName} {userFound.lastName}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {userFound.email} ({userFound.role})
+                          </p>
                         </div>
                         <button
                           onClick={handleInviteByEmail}

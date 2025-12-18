@@ -2,11 +2,11 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuthContext } from "./AuthContext";
-import { 
-  getUserWorkspaces, 
+import {
+  getUserWorkspaces,
   getWorkspaceInvitations,
   Workspace,
-  WorkspaceInvitation
+  WorkspaceInvitation,
 } from "../services/workspace.api";
 
 interface WorkspaceContextType {
@@ -28,7 +28,9 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
 export const useWorkspaceContext = () => {
   const context = useContext(WorkspaceContext);
   if (!context) {
-    throw new Error("useWorkspaceContext must be used within a WorkspaceProvider");
+    throw new Error(
+      "useWorkspaceContext must be used within a WorkspaceProvider"
+    );
   }
   return context;
 };
@@ -37,7 +39,9 @@ interface WorkspaceProviderProps {
   children: React.ReactNode;
 }
 
-export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }) => {
+export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({
+  children,
+}) => {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [invitations, setInvitations] = useState<WorkspaceInvitation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +49,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
 
   const refreshWorkspaces = async () => {
     if (!user) return;
-    
+
     try {
       const userWorkspaces = await getUserWorkspaces();
       setWorkspaces(userWorkspaces);
@@ -56,13 +60,12 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
 
   const refreshInvitations = async () => {
     if (!user) return;
-    
+
     try {
       const userInvitations = await getWorkspaceInvitations();
       setInvitations(userInvitations);
     } catch (error) {
       console.error("Error refreshing invitations:", error);
-      // Don't let invitation errors affect the rest of the app
       setInvitations([]);
     }
   };
@@ -72,10 +75,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
       if (user) {
         setLoading(true);
         try {
-          await Promise.all([
-            refreshWorkspaces(),
-            refreshInvitations()
-          ]);
+          await Promise.all([refreshWorkspaces(), refreshInvitations()]);
         } catch (error) {
           console.error("Error initializing workspace data:", error);
         } finally {
@@ -92,13 +92,13 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
   }, [user]);
 
   return (
-    <WorkspaceContext.Provider 
-      value={{ 
-        workspaces, 
-        invitations, 
-        loading, 
-        refreshWorkspaces, 
-        refreshInvitations 
+    <WorkspaceContext.Provider
+      value={{
+        workspaces,
+        invitations,
+        loading,
+        refreshWorkspaces,
+        refreshInvitations,
       }}
     >
       {children}
