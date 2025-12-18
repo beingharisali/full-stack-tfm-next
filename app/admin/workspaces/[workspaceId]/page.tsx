@@ -53,11 +53,9 @@ const WorkspaceDetailsPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   
-  // Task form states
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   
-  // Member invitation states
   const [emailInput, setEmailInput] = useState("");
   const [userFound, setUserFound] = useState<User | null>(null);
   const [selectedWorkspace, setSelectedWorkspace] = useState("");
@@ -65,16 +63,13 @@ const WorkspaceDetailsPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch workspace details
         const workspaceData = await getWorkspaceById(workspaceId);
         setWorkspace(workspaceData);
         setSelectedWorkspace(workspaceId);
         
-        // Fetch tasks for this workspace
         const workspaceTasks = await getWorkspaceTasks(workspaceId);
         setTasks(workspaceTasks);
         
-        // Fetch all users for invitation
         const usersResponse = await getAllUsers();
         setUsers(usersResponse.users);
       } catch (err: any) {
@@ -92,8 +87,6 @@ const WorkspaceDetailsPage = () => {
 
   const handleCreateTask = async (taskData: Partial<Task>) => {
     try {
-      // We'll need to implement task creation in the parent component or use a modal
-      // For now, redirect to the tasks page
       router.push(`/admin/workspaces/${workspaceId}/tasks`);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to create task");
@@ -103,8 +96,6 @@ const WorkspaceDetailsPage = () => {
 
   const handleUpdateTask = async (taskId: string, taskData: Partial<Task>) => {
     try {
-      // We'll need to implement task update in the parent component or use a modal
-      // For now, redirect to the tasks page
       router.push(`/admin/workspaces/${workspaceId}/tasks`);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to update task");
@@ -114,8 +105,6 @@ const WorkspaceDetailsPage = () => {
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      // We'll need to implement task deletion in the parent component or use a modal
-      // For now, redirect to the tasks page
       router.push(`/admin/workspaces/${workspaceId}/tasks`);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to delete task");
@@ -170,11 +159,9 @@ const WorkspaceDetailsPage = () => {
       setUserFound(null);
       setSuccess(`Invitation sent to ${userFound.email} successfully!`);
       
-      // Refresh workspace data to show updated members
       const updatedWorkspace = await getWorkspaceById(workspaceId);
       setWorkspace(updatedWorkspace);
       
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(""), 3000);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to send invitation. Please try again.");
@@ -284,7 +271,6 @@ const WorkspaceDetailsPage = () => {
           )}
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Workspace Info and Members */}
             <div className="bg-white shadow rounded-lg p-6">
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">Workspace Information</h2>
               
@@ -331,7 +317,6 @@ const WorkspaceDetailsPage = () => {
               )}
             </div>
             
-            {/* Invite Members Section */}
             <div className="bg-white shadow rounded-lg p-6">
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">Invite Members</h2>
               
@@ -389,7 +374,6 @@ const WorkspaceDetailsPage = () => {
             </div>
           </div>
           
-          {/* Tasks Section */}
           <div className="bg-white shadow rounded-lg p-6 mt-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-semibold text-gray-800">Recent Tasks</h2>

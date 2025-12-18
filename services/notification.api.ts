@@ -18,7 +18,7 @@ export const getUserNotifications = async (userId: string, unreadOnly?: boolean)
     });
     return response.data.notifications as Notification[];
   } catch (error) {
-    console.error("Error fetching notifications:", error);
+
     throw error;
   }
 };
@@ -28,7 +28,7 @@ export const markNotificationAsRead = async (notificationId: string) => {
     const response = await http.patch(`/notifications/${notificationId}/read`);
     return response.data.notification as Notification;
   } catch (error) {
-    console.error("Error marking notification as read:", error);
+
     throw error;
   }
 };
@@ -38,7 +38,7 @@ export const markAllNotificationsAsRead = async (userId: string) => {
     const response = await http.patch(`/notifications/user/${userId}/read-all`);
     return response.data;
   } catch (error) {
-    console.error("Error marking all notifications as read:", error);
+
     throw error;
   }
 };
@@ -48,7 +48,7 @@ export const getUnreadNotificationCount = async (userId: string) => {
     const response = await http.get(`/notifications/user/${userId}/unread-count`);
     return response.data.unreadCount as number;
   } catch (error) {
-    console.error("Error fetching unread notification count:", error);
+
     throw error;
   }
 };
@@ -58,7 +58,7 @@ export const deleteNotification = async (notificationId: string) => {
     const response = await http.delete(`/notifications/${notificationId}`);
     return response.data;
   } catch (error) {
-    console.error("Error deleting notification:", error);
+
     throw error;
   }
 };

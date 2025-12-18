@@ -69,9 +69,7 @@ function Page() {
       setActivityLog(logs);
       setFilteredActivities(logs);
     } catch (err: any) {
-      console.log(
-        err.response?.data?.message || err.message || "Failed to fetch tasks"
-      );
+
     } finally {
       setLoading(false);
     }

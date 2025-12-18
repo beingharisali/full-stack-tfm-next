@@ -6,11 +6,8 @@ import { useSocket } from "../../context/SocketContext";
 import { useAuthContext } from "../../context/AuthContext";
 import { MessageCircle, X, Send, User, Users, Trash2 } from "lucide-react";
 import { 
-  sendChatRequest as apiSendChatRequest, 
-  respondToChatRequest, 
   sendPrivateMessage, 
   deleteMessage, 
-  getUserChatRequests,
   getOnlineUsers as apiGetOnlineUsers
 } from "../../services/chat.api";
 
@@ -24,24 +21,7 @@ interface Message {
   deleted?: boolean;
 }
 
-interface ChatRequest {
-  id: string;
-  requesterId: string;
-  requesterName: string;
-  recipientId: string;
-  recipientEmail: string;
-  status: 'pending' | 'accepted' | 'rejected';
-  timestamp: Date;
-}
-
-interface ChatConnection {
-  id: string;
-  user1Id: string;
-  user2Id: string;
-  user1Email: string;
-  user2Email: string;
-  createdAt: Date;
-}
+// Chat requests removed as per requirements
 
 interface OnlineUser {
   id: string;
@@ -59,10 +39,7 @@ const ChatWidget: React.FC = () => {
   const [activeRecipient, setActiveRecipient] = useState<OnlineUser | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState("");
-  const [chatRequests, setChatRequests] = useState<ChatRequest[]>([]);
-  const [chatConnections, setChatConnections] = useState<ChatConnection[]>([]);
-  const [recipientEmail, setRecipientEmail] = useState("");
-  const [showEmailInput, setShowEmailInput] = useState(false);
+  // Chat requests removed as per requirements
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -73,7 +50,6 @@ const ChatWidget: React.FC = () => {
     if (!socket) return;
 
     const handleMessage = (data: any) => {
-      console.log("Received message:", data);
       const message: Message = {
         id: data._id || Date.now().toString(),
         senderId: data.senderId,
@@ -87,7 +63,6 @@ const ChatWidget: React.FC = () => {
     };
 
     const handlePrivateMessage = (data: any) => {
-      console.log("Received private message:", data);
       const message: Message = {
         id: data._id || Date.now().toString(),
         senderId: data.senderId,
@@ -101,7 +76,6 @@ const ChatWidget: React.FC = () => {
     };
 
     const handleChatRequest = (data: any) => {
-      console.log("Received chat request:", data);
       const request: ChatRequest = {
         id: data._id || data.id,
         requesterId: data.requester,
@@ -115,7 +89,6 @@ const ChatWidget: React.FC = () => {
     };
 
     const handleChatRequestResponse = (data: any) => {
-      console.log("Received chat request response:", data);
       setChatRequests(prev => prev.map(req => 
         req.id === data.requestId ? {...req, status: data.status} : req
       ));
@@ -134,7 +107,6 @@ const ChatWidget: React.FC = () => {
     };
 
     const handleNewConnection = (data: any) => {
-      console.log("New connection established:", data);
       const connection: ChatConnection = {
         id: data.connectionId,
         user1Id: data.user1Id,
@@ -146,13 +118,9 @@ const ChatWidget: React.FC = () => {
       setChatConnections(prev => [...prev, connection]);
     };
 
-    const handleUserOnline = (userId: string) => {
-      console.log("User came online:", userId);
-    };
+    const handleUserOnline = (userId: string) => {};
 
-    const handleUserOffline = (userId: string) => {
-      console.log("User went offline:", userId);
-    };
+    const handleUserOffline = (userId: string) => {};
 
     const handleTyping = (data: any) => {
       if (data.senderId !== user?.id) {
@@ -163,16 +131,11 @@ const ChatWidget: React.FC = () => {
     };
 
     const handleChatRequestError = (data: any) => {
-      console.log("Chat request error:", data);
       alert(data.message || "Error sending chat request");
     };
 
     socket.on("privateMessage", handlePrivateMessage);
     socket.on("message", handleMessage);
-    socket.on("chatRequest", handleChatRequest);
-    socket.on("chatRequestResponse", handleChatRequestResponse);
-    socket.on("newConnection", handleNewConnection);
-    socket.on("chatRequestError", handleChatRequestError);
     socket.on("userOnline", handleUserOnline);
     socket.on("userOffline", handleUserOffline);
     socket.on("typing", handleTyping);
@@ -180,10 +143,6 @@ const ChatWidget: React.FC = () => {
     return () => {
       socket.off("privateMessage", handlePrivateMessage);
       socket.off("message", handleMessage);
-      socket.off("chatRequest", handleChatRequest);
-      socket.off("chatRequestResponse", handleChatRequestResponse);
-      socket.off("newConnection", handleNewConnection);
-      socket.off("chatRequestError", handleChatRequestError);
       socket.off("userOnline", handleUserOnline);
       socket.off("userOffline", handleUserOffline);
       socket.off("typing", handleTyping);
@@ -192,22 +151,6 @@ const ChatWidget: React.FC = () => {
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !user || !activeRecipient) return;
-
-    const hasConnection = chatConnections.some(conn => 
-      (conn.user1Id === user.id && conn.user2Id === activeRecipient.id) ||
-      (conn.user2Id === user.id && conn.user1Id === activeRecipient.id)
-    );
-    
-    const acceptedRequest = chatRequests.some(req => 
-      req.requesterId === user.id && 
-      req.recipientId === activeRecipient.id && 
-      req.status === 'accepted'
-    );
-    
-    if (!hasConnection && !acceptedRequest) {
-      alert("You need to send a chat request and have it accepted before messaging this user.");
-      return;
-    }
 
     try {
       const result = await sendPrivateMessage(user.id, activeRecipient.id, newMessage);
@@ -259,83 +202,7 @@ const ChatWidget: React.FC = () => {
     });
   };
 
-  const sendChatRequest = async () => {
-    if (!recipientEmail.trim() || !user) return;
-    
-    try {
-      const existingRequest = chatRequests.find(req => 
-        req.requesterId === user.id && 
-        req.recipientEmail === recipientEmail && 
-        (req.status === 'pending' || req.status === 'accepted')
-      );
-      
-      if (existingRequest) {
-        if (existingRequest.status === 'accepted') {
-          alert("You are already connected with this user.");
-        } else {
-          alert("A chat request is already pending for this user.");
-        }
-        return;
-      }
-      
-      const result = await apiSendChatRequest(user.id, `${user.firstName} ${user.lastName}`, recipientEmail);
-      
-      const request: ChatRequest = {
-        id: result.chatRequest._id,
-        requesterId: user.id,
-        requesterName: `${user.firstName} ${user.lastName}`,
-        recipientId: result.chatRequest.recipient,
-        recipientEmail: recipientEmail,
-        status: 'pending',
-        timestamp: new Date(result.chatRequest.createdAt),
-      };
-      setChatRequests(prev => [...prev, request]);
-      setRecipientEmail("");
-      setShowEmailInput(false);
-      alert("Chat request sent successfully!");
-    } catch (error: any) {
-      console.error("Error sending chat request:", error);
-      alert(error.response?.data?.message || "Failed to send chat request");
-    }
-  };
-
-  const handleRespondToChatRequest = async (requestId: string, response: 'accepted' | 'rejected') => {
-    if (!user) return;
-    
-    try {
-      const result = await respondToChatRequest(requestId, response, user.id);
-      
-      setChatRequests(prev => prev.map(req => 
-        req.id === requestId ? {...req, status: response} : req
-      ));
-      
-      if (response === 'accepted') {
-        const request = chatRequests.find(req => req.id === requestId);
-        if (request) {
-          const connection: ChatConnection = {
-            id: Date.now().toString(),
-            user1Id: request.requesterId,
-            user2Id: user.id,
-            user1Email: request.requesterName,
-            user2Email: `${user.firstName} ${user.lastName}`,
-            createdAt: new Date(),
-          };
-          setChatConnections(prev => [...prev, connection]);
-        }
-      }
-      
-      if (socket) {
-        socket.emit("chatRequestResponse", {
-          requestId,
-          status: response,
-          responderId: user.id,
-        });
-      }
-    } catch (error: any) {
-      console.error("Error responding to chat request:", error);
-      alert(error.response?.data?.message || `Failed to ${response} chat request`);
-    }
-  };
+  // Chat requests removed as per requirements
 
   const handleDeleteMessage = async (messageId: string) => {
     if (!user) return;
@@ -380,22 +247,6 @@ const ChatWidget: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      getUserChatRequests(user.id)
-        .then(requests => {
-          setChatRequests(requests.map(req => ({
-            id: req._id,
-            requesterId: req.requester._id,
-            requesterName: `${req.requester.firstName} ${req.requester.lastName}`,
-            recipientId: req.recipient._id,
-            recipientEmail: req.recipientEmail,
-            status: req.status,
-            timestamp: new Date(req.createdAt),
-          })));
-        })
-        .catch(error => {
-          console.error("Error loading chat requests:", error);
-        });
-      
       apiGetOnlineUsers()
         .then(users => {
           setOnlineUsers(users.map(user => ({
@@ -459,36 +310,7 @@ const ChatWidget: React.FC = () => {
               ))}
             </div>
             
-            {chatRequests.filter(req => req.recipientId === user?.id && req.status === 'pending').length > 0 && (
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <div className="text-xs font-medium text-gray-700 mb-2">Chat Requests</div>
-                {chatRequests
-                  .filter(req => req.recipientId === user?.id && req.status === 'pending')
-                  .map(request => (
-                    <div key={request.id} className="flex items-center justify-between bg-yellow-50 p-2 rounded mb-2">
-                      <div className="text-xs">
-                        <span className="font-medium">{request.requesterName}</span>
-                        <span className="text-gray-600"> wants to chat</span>
-                      </div>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => handleRespondToChatRequest(request.id, 'accepted')}
-                          className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => handleRespondToChatRequest(request.id, 'rejected')}
-                          className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                }
-              </div>
-            )}
+            {/* Chat requests removed as per requirements */}
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
@@ -578,37 +400,7 @@ const ChatWidget: React.FC = () => {
               </div>
             )}
             <div className="flex mb-2">
-              {showEmailInput ? (
-                <div className="flex w-full gap-2">
-                  <input
-                    type="email"
-                    value={recipientEmail}
-                    onChange={(e) => setRecipientEmail(e.target.value)}
-                    placeholder="Enter user email"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button
-                    onClick={sendChatRequest}
-                    disabled={!recipientEmail.trim()}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Send Request
-                  </button>
-                  <button
-                    onClick={() => setShowEmailInput(false)}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowEmailInput(true)}
-                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 text-sm"
-                >
-                  Add User by Email
-                </button>
-              )}
+              {/* Chat requests removed as per requirements */}
             </div>
                           
             {activeRecipient && (

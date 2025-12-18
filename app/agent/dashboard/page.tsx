@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Nav from "@/app/component/Navbar";
 import ProtectedRoute from "@/shared/ProtectedRoute";
-import ChatWidget from "@/app/component/ChatWidget";
+// ChatWidget removed as per requirements
 import { ArrowUp, ListChecks, Activity, Users, Clipboard, Clock, CheckCircle, Play, Calendar, AlertCircle, User, Crown, UserCircle, Folder } from "lucide-react";
 import { getTasks, Task } from "@/services/task.api";
 
@@ -371,7 +371,6 @@ export default function page() {
 			>
 				<ArrowUp className="w-6 h-6" />
 			</button>
-			<ChatWidget />
 		</ProtectedRoute>
 	);
 }

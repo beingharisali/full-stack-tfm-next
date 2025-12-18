@@ -4,7 +4,7 @@ export const emitEvent = (socket: Socket | null, event: string, data?: any) => {
   if (socket && socket.connected) {
     socket.emit(event, data);
   } else {
-    console.warn("Socket is not connected. Cannot emit event:", event);
+
   }
 };
 

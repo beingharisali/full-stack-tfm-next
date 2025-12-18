@@ -20,16 +20,22 @@ const WorkspaceManagementPage = () => {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  
+  useEffect(() => {
+    console.log("Workspaces state updated:", workspaces);
+  }, [workspaces]);
   const [workspaceName, setWorkspaceName] = useState("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [selectedWorkspace, setSelectedWorkspace] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [emailInput, setEmailInput] = useState(""); // For email-based invitation
-  const [userFound, setUserFound] = useState<User | null>(null); // To store found user
+  const [emailInput, setEmailInput] = useState("");
+  const [userFound, setUserFound] = useState<User | null>(null);
 
   useEffect(() => {
+    console.log("useEffect triggered with user:", user);
+    
     const fetchUsers = async () => {
       try {
         const response = await getAllUsers();
@@ -42,8 +48,11 @@ const WorkspaceManagementPage = () => {
 
     const fetchWorkspaces = async () => {
       try {
+        console.log("Fetching workspaces from API");
         const response = await getUserWorkspaces();
+        console.log("Received workspaces:", response);
         setWorkspaces(response);
+        console.log("Workspaces set in state:", response);
       } catch (err) {
         console.error("Error fetching workspaces:", err);
         setError("Failed to fetch workspaces");
@@ -51,8 +60,11 @@ const WorkspaceManagementPage = () => {
     };
 
     if (user?.role === "admin") {
+      console.log("User is admin, fetching data");
       fetchUsers();
       fetchWorkspaces();
+    } else {
+      console.log("User is not admin or not logged in");
     }
   }, [user]);
 
@@ -72,7 +84,6 @@ const WorkspaceManagementPage = () => {
       setWorkspaceName("");
       setSuccess("Workspace created successfully!");
       
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(""), 3000);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to create workspace. Please try again.");
@@ -125,7 +136,6 @@ const WorkspaceManagementPage = () => {
       setUserFound(null);
       setSuccess(`Invitation sent to ${userFound.email} successfully!`);
       
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(""), 3000);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to send invitation. Please try again.");

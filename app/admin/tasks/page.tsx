@@ -22,7 +22,7 @@ function AdminTasksPage() {
       const fetchedTasks = await getTasks();
       setTasks(fetchedTasks);
     } catch (error) {
-      console.error("Failed to fetch tasks", error);
+
       toast.error("Failed to fetch tasks.");
     } finally {
       setLoading(false);
@@ -39,13 +39,13 @@ function AdminTasksPage() {
       toast.success("Task status updated!");
       fetchTasks();
     } catch (error) {
-      console.error("Failed to update task", error);
+
       toast.error("Failed to update task status.");
     }
   };
 
   const handleEditClick = (task: Task) => {
-    console.log("Edit task:", task);
+
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -56,7 +56,7 @@ function AdminTasksPage() {
       toast.success("Task deleted successfully!");
       fetchTasks();
     } catch (error) {
-      console.error("Failed to delete task", error);
+
       toast.error("Failed to delete task.");
     }
   };
