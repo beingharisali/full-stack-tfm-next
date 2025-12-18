@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
 import ProtectedRoute from "@/shared/ProtectedRoute";
 
+console.log("testing");
+
 import toast from "react-hot-toast";
 
 import {
@@ -52,7 +54,6 @@ function AdminDashboardPage() {
       setPendingTasks(pending);
       setOverdueTasks(overdue);
 
-
       const logs: any[] = [];
       fetchedTasks.forEach((task: Task) => {
         logs.push({
@@ -80,7 +81,6 @@ function AdminDashboardPage() {
       );
       setActivityLog(logs.slice(0, 10));
     } catch (error) {
-
       toast.error("Failed to fetch tasks.");
     } finally {
       setLoading(false);
@@ -97,14 +97,11 @@ function AdminDashboardPage() {
       toast.success("Task status updated!");
       fetchTasks();
     } catch (error) {
-
       toast.error("Failed to update task status.");
     }
   };
 
-  const handleEditClick = (task: Task) => {
-
-  };
+  const handleEditClick = (task: Task) => {};
 
   const handleDeleteTask = async (taskId: string) => {
     if (!confirm("Are you sure you want to delete this task?")) return;
@@ -114,7 +111,6 @@ function AdminDashboardPage() {
       toast.success("Task deleted successfully!");
       fetchTasks();
     } catch (error) {
-
       toast.error("Failed to delete task.");
     }
   };
@@ -130,84 +126,81 @@ function AdminDashboardPage() {
     <ProtectedRoute requiredRole="admin">
       <Nav />
 
-      <div className='flex flex-col md:flex-row mx-4 mt-6 gap-6'>
-        <div className='md:w-2/3 bg-white shadow-lg rounded-xl p-6'>
-          <h2 className='text-3xl font-bold text-gray-800 mb-4'>Analytics</h2>
+      <div className="flex flex-col md:flex-row mx-4 mt-6 gap-6">
+        <div className="md:w-2/3 bg-white shadow-lg rounded-xl p-6">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Analytics</h2>
 
-          <div className='grid grid-cols-2 gap-4 mb-6'>
-            <div className='bg-gray-100 p-4 rounded-lg text-center'>
-              <p className='text-gray-500 text-sm'>Total Tasks</p>
-              <p className='text-2xl font-bold'>{totalTasks}</p>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-gray-100 p-4 rounded-lg text-center">
+              <p className="text-gray-500 text-sm">Total Tasks</p>
+              <p className="text-2xl font-bold">{totalTasks}</p>
             </div>
 
-            <div className='bg-green-100 p-4 rounded-lg text-center'>
-              <p className='text-gray-600 text-sm'>Completed</p>
-              <p className='text-2xl font-bold text-green-700'>
+            <div className="bg-green-100 p-4 rounded-lg text-center">
+              <p className="text-gray-600 text-sm">Completed</p>
+              <p className="text-2xl font-bold text-green-700">
                 {completedTasks}
               </p>
             </div>
 
-            <div className='bg-yellow-100 p-4 rounded-lg text-center'>
-              <p className='text-gray-600 text-sm'>Pending</p>
-              <p className='text-2xl font-bold text-yellow-700'>
+            <div className="bg-yellow-100 p-4 rounded-lg text-center">
+              <p className="text-gray-600 text-sm">Pending</p>
+              <p className="text-2xl font-bold text-yellow-700">
                 {pendingTasks}
               </p>
             </div>
 
-            <div className='bg-red-100 p-4 rounded-lg text-center'>
-              <p className='text-gray-600 text-sm'>Overdue</p>
-              <p className='text-2xl font-bold text-red-700'>{overdueTasks}</p>
+            <div className="bg-red-100 p-4 rounded-lg text-center">
+              <p className="text-gray-600 text-sm">Overdue</p>
+              <p className="text-2xl font-bold text-red-700">{overdueTasks}</p>
             </div>
           </div>
 
-          <BarChart
-            width={780}
-            height={220}
-            data={chartData}>
-            <CartesianGrid strokeDasharray='3 3' />
-            <XAxis dataKey='name' />
+          <BarChart width={780} height={220} data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
             <YAxis allowDecimals={false} />
             <Tooltip />
             <Legend />
-            <Bar
-              dataKey='value'
-              fill='#1D4ED8'
-            />
+            <Bar dataKey="value" fill="#1D4ED8" />
           </BarChart>
         </div>
 
-        <div className='md:w-1/3 bg-white shadow-lg rounded-xl p-6'>
-          <div className='flex justify-between items-center mb-4'>
-            <h2 className='text-3xl font-bold text-gray-800'>Tasks Overview</h2>
-            <div className='flex space-x-2'>
+        <div className="md:w-1/3 bg-white shadow-lg rounded-xl p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-3xl font-bold text-gray-800">Tasks Overview</h2>
+            <div className="flex space-x-2">
               <button
                 onClick={() => router.push("/tasks")}
-                className='px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition'>
+                className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
+              >
                 Tasks
               </button>
               <button
                 onClick={() => router.push("/admin/workspaces")}
-                className='px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition'>
+                className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition"
+              >
                 Manage Spaces
               </button>
             </div>
           </div>
 
-          <h3 className='text-2xl font-semibold text-gray-700 mb-4'>
+          <h3 className="text-2xl font-semibold text-gray-700 mb-4">
             Recent Activity
           </h3>
 
           {activityLog.length === 0 ? (
-            <p className='text-gray-500'>No recent activity found.</p>
+            <p className="text-gray-500">No recent activity found.</p>
           ) : (
-            <div className='max-h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100'>
-              <ul className='space-y-4'>
+            <div className="max-h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+              <ul className="space-y-4">
                 {activityLog.map((log, index) => (
                   <li
                     key={index}
-                    className='bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition flex flex-col gap-1'>
-                    <div className='flex items-center justify-between'>
-                      <p className='text-gray-800 font-medium'>{log.message}</p>
+                    className="bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition flex flex-col gap-1"
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className="text-gray-800 font-medium">{log.message}</p>
                       <span
                         className={`text-xs font-semibold px-2 py-1 rounded-full ${
                           log.type === "created"
@@ -215,11 +208,12 @@ function AdminDashboardPage() {
                             : log.type === "updated"
                             ? "bg-yellow-100 text-yellow-800"
                             : "bg-red-100 text-red-800"
-                        }`}>
+                        }`}
+                      >
                         {log.type.charAt(0).toUpperCase() + log.type.slice(1)}
                       </span>
                     </div>
-                    <p className='text-gray-400 text-xs'>
+                    <p className="text-gray-400 text-xs">
                       {new Date(log.time).toLocaleString()}
                     </p>
                   </li>
