@@ -71,7 +71,7 @@ export async function logoutApi(): Promise<void> {
 	try {
 		await http.post("/auth/logout");
 	} catch (error) {
-		console.error("Logout API error:", error);
+		
 	} finally {
 		if (typeof window !== "undefined") {
 			localStorage.removeItem("token");

@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				setUser(null);
 			}
 		} catch (error) {
-			console.error("Error fetching profile:", error);
+			
 		} finally {
 			setLoading(false);
 		}
@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				}
 			}
 		} catch (error) {
-			console.error("Error updating profile:", error);
+			
 			throw error;
 		}
 	};
@@ -132,9 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				localStorage.setItem("token", res.token);
 			}
 		} else {
-			console.warn(
-				"Registration successful but no token received. User might need to log in manually."
-			);
+			
 		}
 		setUser(res.user);
 		router.replace(getRedirectPath(res.user.role));
@@ -159,7 +157,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				throw new Error("Invalid user data received after login.");
 			}
 		} catch (error) {
-			console.error("Login failed in AuthContext:", error);
+			
 			throw error;
 		}
 	};
@@ -168,7 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		try {
 			await logoutApi();
 		} catch (error) {
-			console.error("Error during logout API call:", error);
+			
 		} finally {
 			setUser(null);
 			if (typeof window !== "undefined") {

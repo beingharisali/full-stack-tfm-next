@@ -81,9 +81,9 @@ export default function RegisterPage() {
       );
       toast.success("Registration Successful 🎉", { position: "top-center" });
     } catch (error) {
-      const err = error as { response?: { data?: { msg?: string } } };
+      const err = error as { response?: { data?: { message?: string } } };
       toast.error(
-        `Registration Failed ❌: ${err.response?.data?.msg || "Unknown error"}`,
+        `Registration Failed ❌: ${err.response?.data?.message || "Unknown error"}`,
         { position: "top-center" }
       );
     } finally {

@@ -32,7 +32,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const { user } = useAuthContext();
 
   useEffect(() => {
-    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:5001", {
+    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:5000", {
       transports: ["websocket", "polling"],
       reconnection: true,
       reconnectionAttempts: 5,
@@ -41,27 +41,27 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     });
 
     socketInstance.on("connect", () => {
-      console.log("Socket connected:", socketInstance.id);
+
       setIsConnected(true);
       
       if (user?.id) {
         socketInstance.emit("join", user.id);
-        console.log("Joined room:", user.id);
+
       }
     });
 
     socketInstance.on("disconnect", () => {
-      console.log("Socket disconnected");
+
       setIsConnected(false);
     });
 
     socketInstance.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
+
       setIsConnected(false);
     });
 
     socketInstance.on("notification", (notification) => {
-      console.log("Notification received:", notification);
+
     });
 
     setSocket(socketInstance);

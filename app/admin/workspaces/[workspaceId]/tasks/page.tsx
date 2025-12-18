@@ -7,6 +7,7 @@ import ProtectedRoute from "../../../../../shared/ProtectedRoute";
 import { getWorkspaceTasks, getWorkspaceById } from "../../../../../services/workspace.api";
 import { createTask, updateTask, deleteTask, Task } from "../../../../../services/task.api";
 import TaskForm from "../../../../../app/component/TaskForm";
+import ChatWidget from "../../../../../app/component/ChatWidget";
 
 interface Workspace {
   _id: string;
@@ -33,11 +34,9 @@ const WorkspaceTaskManagementPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch workspace details
         const workspaceData = await getWorkspaceById(workspaceId);
         setWorkspace(workspaceData);
         
-        // Fetch tasks for this workspace
         const workspaceTasks = await getWorkspaceTasks(workspaceId);
         setTasks(workspaceTasks);
       } catch (err: any) {
@@ -55,7 +54,6 @@ const WorkspaceTaskManagementPage = () => {
 
   const handleCreateTask = async (taskData: Task) => {
     try {
-      // Remove the workspace property from taskData before sending to API
       const { workspace, ...taskWithoutWorkspace } = taskData;
       const newTask = await createTask({
         ...taskWithoutWorkspace,
@@ -75,7 +73,6 @@ const WorkspaceTaskManagementPage = () => {
     try {
       if (!taskData._id) return;
       
-      // Remove the workspace property from taskData before sending to API
       const { workspace, ...taskWithoutWorkspace } = taskData;
       const updatedTask = await updateTask(taskData._id, taskWithoutWorkspace as Partial<Omit<Task, "_id" | "createdAt" | "updatedAt">>);
       setTasks(tasks.map(task => task._id === taskData._id ? updatedTask : task));
@@ -288,6 +285,7 @@ const WorkspaceTaskManagementPage = () => {
           </div>
         </div>
       </div>
+      <ChatWidget />
     </ProtectedRoute>
   );
 };

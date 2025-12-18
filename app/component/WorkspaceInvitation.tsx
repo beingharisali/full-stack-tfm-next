@@ -9,17 +9,21 @@ interface WorkspaceInvitationProps {
 }
 
 const WorkspaceInvitation: React.FC<WorkspaceInvitationProps> = ({ onInvitationResponse }) => {
-  const { invitations, refreshInvitations } = useWorkspaceContext();
+  const { invitations, refreshInvitations, refreshWorkspaces } = useWorkspaceContext();
 
   const handleResponse = async (invitationId: string, response: "accepted" | "rejected") => {
     try {
       await respondToInvitation(invitationId, response);
       await refreshInvitations();
+      if (response === "accepted") {
+       
+        await refreshWorkspaces();
+      }
       if (onInvitationResponse) {
         onInvitationResponse();
       }
       
-      // Show success message
+
       if (response === "accepted") {
         alert("Invitation accepted! You can now access the workspace.");
       } else {

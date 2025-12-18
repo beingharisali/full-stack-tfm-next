@@ -33,7 +33,7 @@ function Nav() {
       await logoutUser();
       setShowLogoutModal(false);
     } catch (error) {
-      console.log("Error occurred in logging out the user");
+
     }
   }
 
@@ -43,7 +43,7 @@ function Nav() {
         const count = await getUnreadNotificationCount(user.id);
         setHasUnreadNotifications(count > 0);
       } catch (error) {
-        console.error("Error fetching unread notification count:", error);
+        
       }
     }
   };
@@ -54,7 +54,7 @@ function Nav() {
         await markAllNotificationsAsRead(user.id);
         setHasUnreadNotifications(false);
       } catch (error) {
-        console.error("Error marking notifications as read:", error);
+        
       }
     }
   };
@@ -89,7 +89,6 @@ function Nav() {
   useEffect(() => {
     if (socket) {
       const handleNewNotification = (notification: any) => {
-        console.log("New notification received:", notification);
         setHasUnreadNotifications(true);
       };
 

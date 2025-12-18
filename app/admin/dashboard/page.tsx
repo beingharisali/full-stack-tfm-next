@@ -6,7 +6,6 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
 import ProtectedRoute from "@/shared/ProtectedRoute";
-import ChatWidget from "@/app/component/ChatWidget";
 
 import toast from "react-hot-toast";
 
@@ -52,7 +51,7 @@ function AdminDashboardPage() {
       setCompletedTasks(completed);
       setPendingTasks(pending);
       setOverdueTasks(overdue);
-      console.log('testing')
+
 
       const logs: any[] = [];
       fetchedTasks.forEach((task: Task) => {
@@ -81,7 +80,7 @@ function AdminDashboardPage() {
       );
       setActivityLog(logs.slice(0, 10));
     } catch (error) {
-      console.error("Failed to fetch tasks", error);
+
       toast.error("Failed to fetch tasks.");
     } finally {
       setLoading(false);
@@ -98,13 +97,13 @@ function AdminDashboardPage() {
       toast.success("Task status updated!");
       fetchTasks();
     } catch (error) {
-      console.error("Failed to update task", error);
+
       toast.error("Failed to update task status.");
     }
   };
 
   const handleEditClick = (task: Task) => {
-    console.log("Edit task:", task);
+
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -115,7 +114,7 @@ function AdminDashboardPage() {
       toast.success("Task deleted successfully!");
       fetchTasks();
     } catch (error) {
-      console.error("Failed to delete task", error);
+
       toast.error("Failed to delete task.");
     }
   };
@@ -230,7 +229,6 @@ function AdminDashboardPage() {
           )}
         </div>
       </div>
-      <ChatWidget />
     </ProtectedRoute>
   );
 }

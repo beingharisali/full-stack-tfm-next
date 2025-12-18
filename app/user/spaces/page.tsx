@@ -49,14 +49,11 @@ const UserSpacesPage = () => {
     try {
       await leaveWorkspace(workspaceId);
       setSuccess("Successfully left the workspace");
-      // Refresh workspaces list
       await refreshWorkspaces();
-      // If we were viewing the workspace we're leaving, clear selection
       if (selectedWorkspace === workspaceId) {
         setSelectedWorkspace("");
         setTasks([]);
       }
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(""), 3000);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to leave workspace");

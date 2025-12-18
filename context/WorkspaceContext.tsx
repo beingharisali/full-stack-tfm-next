@@ -62,6 +62,8 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
       setInvitations(userInvitations);
     } catch (error) {
       console.error("Error refreshing invitations:", error);
+      // Don't let invitation errors affect the rest of the app
+      setInvitations([]);
     }
   };
 

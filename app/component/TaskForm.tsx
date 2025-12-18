@@ -47,7 +47,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const [assigneeName, setAssigneeName] = useState(
     initialTask?.assigneeName || ""
   );
-  const [workspace, setWorkspace] = useState(initialTask?.workspace || ""); // Add workspace state
+  const [workspace, setWorkspace] = useState(initialTask?.workspace || "");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
