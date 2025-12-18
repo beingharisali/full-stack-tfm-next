@@ -6,8 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import ProtectedRoute from "../../../../../shared/ProtectedRoute";
 import { getWorkspaceTasks, getWorkspaceById } from "../../../../../services/workspace.api";
 import { createTask, updateTask, deleteTask, Task } from "../../../../../services/task.api";
-import TaskForm from "../../../../../app/component/TaskForm";
-import ChatWidget from "../../../../../app/component/ChatWidget";
+import TaskForm from "../../../../../component/TaskForm";
+import ChatWidget from "../../../../../component/ChatWidget";
 
 interface Workspace {
   _id: string;
