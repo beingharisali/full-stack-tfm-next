@@ -5,10 +5,10 @@ import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../../context/SocketContext";
 import { useAuthContext } from "../../context/AuthContext";
 import { MessageCircle, X, Send, User, Users, Trash2 } from "lucide-react";
-import { 
-  sendPrivateMessage, 
-  deleteMessage, 
-  getOnlineUsers as apiGetOnlineUsers
+import {
+  sendPrivateMessage,
+  deleteMessage,
+  getOnlineUsers as apiGetOnlineUsers,
 } from "../../services/chat.api";
 
 interface Message {
@@ -20,8 +20,6 @@ interface Message {
   timestamp: Date;
   deleted?: boolean;
 }
-
-// Chat requests removed as per requirements
 
 interface OnlineUser {
   id: string;
@@ -36,7 +34,9 @@ const ChatWidget: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
-  const [activeRecipient, setActiveRecipient] = useState<OnlineUser | null>(null);
+  const [activeRecipient, setActiveRecipient] = useState<OnlineUser | null>(
+    null
+  );
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState("");
   // Chat requests removed as per requirements
@@ -59,7 +59,7 @@ const ChatWidget: React.FC = () => {
         timestamp: new Date(data.timestamp),
         deleted: data.deleted,
       };
-      setMessages(prev => [...prev, message]);
+      setMessages((prev) => [...prev, message]);
     };
 
     const handlePrivateMessage = (data: any) => {
@@ -72,7 +72,7 @@ const ChatWidget: React.FC = () => {
         timestamp: new Date(data.timestamp),
         deleted: data.deleted,
       };
-      setMessages(prev => [...prev, message]);
+      setMessages((prev) => [...prev, message]);
     };
 
     const handleChatRequest = (data: any) => {
@@ -85,15 +85,17 @@ const ChatWidget: React.FC = () => {
         status: data.status,
         timestamp: new Date(data.createdAt),
       };
-      setChatRequests(prev => [...prev, request]);
+      setChatRequests((prev) => [...prev, request]);
     };
 
     const handleChatRequestResponse = (data: any) => {
-      setChatRequests(prev => prev.map(req => 
-        req.id === data.requestId ? {...req, status: data.status} : req
-      ));
-      
-      if (data.status === 'accepted') {
+      setChatRequests((prev) =>
+        prev.map((req) =>
+          req.id === data.requestId ? { ...req, status: data.status } : req
+        )
+      );
+
+      if (data.status === "accepted") {
         const connection: ChatConnection = {
           id: data.connectionId || Date.now().toString(),
           user1Id: data.user1Id || data.requesterId,
@@ -102,7 +104,7 @@ const ChatWidget: React.FC = () => {
           user2Email: data.user2Email || "",
           createdAt: new Date(data.createdAt || Date.now()),
         };
-        setChatConnections(prev => [...prev, connection]);
+        setChatConnections((prev) => [...prev, connection]);
       }
     };
 
@@ -115,7 +117,7 @@ const ChatWidget: React.FC = () => {
         user2Email: data.user2Email,
         createdAt: new Date(),
       };
-      setChatConnections(prev => [...prev, connection]);
+      setChatConnections((prev) => [...prev, connection]);
     };
 
     const handleUserOnline = (userId: string) => {};
@@ -153,8 +155,12 @@ const ChatWidget: React.FC = () => {
     if (!newMessage.trim() || !user || !activeRecipient) return;
 
     try {
-      const result = await sendPrivateMessage(user.id, activeRecipient.id, newMessage);
-      
+      const result = await sendPrivateMessage(
+        user.id,
+        activeRecipient.id,
+        newMessage
+      );
+
       const message: Message = {
         id: result._id,
         senderId: user.id,
@@ -163,7 +169,7 @@ const ChatWidget: React.FC = () => {
         content: newMessage,
         timestamp: new Date(result.createdAt),
       };
-      setMessages(prev => [...prev, message]);
+      setMessages((prev) => [...prev, message]);
       setNewMessage("");
 
       if (socket) {
@@ -202,18 +208,18 @@ const ChatWidget: React.FC = () => {
     });
   };
 
-  // Chat requests removed as per requirements
-
   const handleDeleteMessage = async (messageId: string) => {
     if (!user) return;
-    
+
     try {
       const result = await deleteMessage(messageId, user.id);
-      
+
       if (result.success) {
-        setMessages(prev => prev.map(msg => 
-          msg.id === messageId ? {...msg, deleted: true} : msg
-        ));
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === messageId ? { ...msg, deleted: true } : msg
+          )
+        );
       } else {
         alert(result.message || "Failed to delete message");
       }
@@ -225,15 +231,17 @@ const ChatWidget: React.FC = () => {
 
   const deleteChat = async (recipientId: string) => {
     if (!user) return;
-    
+
     try {
-      setMessages(prev => prev.map(msg => 
-        (msg.senderId === user?.id && msg.recipientId === recipientId) ||
-        (msg.recipientId === user?.id && msg.senderId === recipientId)
-          ? {...msg, deleted: true}
-          : msg
-      ));
-      
+      setMessages((prev) =>
+        prev.map((msg) =>
+          (msg.senderId === user?.id && msg.recipientId === recipientId) ||
+          (msg.recipientId === user?.id && msg.senderId === recipientId)
+            ? { ...msg, deleted: true }
+            : msg
+        )
+      );
+
       alert("Chat deleted successfully");
     } catch (error) {
       console.error("Error deleting chat:", error);
@@ -248,14 +256,16 @@ const ChatWidget: React.FC = () => {
   useEffect(() => {
     if (user) {
       apiGetOnlineUsers()
-        .then(users => {
-          setOnlineUsers(users.map(user => ({
-            id: user.id,
-            name: `${user.firstName} ${user.lastName}`,
-            role: user.role,
-          })));
+        .then((users) => {
+          setOnlineUsers(
+            users.map((user) => ({
+              id: user.id,
+              name: `${user.firstName} ${user.lastName}`,
+              role: user.role,
+            }))
+          );
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Error loading online users:", error);
         });
     }
@@ -268,7 +278,7 @@ const ChatWidget: React.FC = () => {
         className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all z-50"
       >
         <MessageCircle size={24} />
-        {messages.some(m => !m.recipientId) && (
+        {messages.some((m) => !m.recipientId) && (
           <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full"></span>
         )}
       </button>
@@ -280,7 +290,7 @@ const ChatWidget: React.FC = () => {
               <MessageCircle className="mr-2" />
               <h3 className="font-bold">Team Chat</h3>
             </div>
-            <button 
+            <button
               onClick={toggleChat}
               className="text-white hover:text-gray-200"
             >
@@ -291,7 +301,9 @@ const ChatWidget: React.FC = () => {
           <div className="p-3 bg-gray-50 border-b border-gray-200">
             <div className="flex items-center mb-2">
               <Users size={16} className="mr-2 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">Online Users</span>
+              <span className="text-sm font-medium text-gray-700">
+                Online Users
+              </span>
             </div>
             <div className="flex flex-wrap gap-2">
               {onlineUsers.map((onlineUser) => (
@@ -309,7 +321,7 @@ const ChatWidget: React.FC = () => {
                 </button>
               ))}
             </div>
-            
+
             {/* Chat requests removed as per requirements */}
           </div>
 
@@ -324,7 +336,9 @@ const ChatWidget: React.FC = () => {
                   <div
                     key={message.id}
                     className={`flex ${
-                      message.senderId === user?.id ? "justify-end" : "justify-start"
+                      message.senderId === user?.id
+                        ? "justify-end"
+                        : "justify-start"
                     }`}
                   >
                     <div
@@ -340,14 +354,18 @@ const ChatWidget: React.FC = () => {
                         </div>
                       )}
                       {message.deleted ? (
-                        <div className="italic text-gray-500">This message was deleted</div>
+                        <div className="italic text-gray-500">
+                          This message was deleted
+                        </div>
                       ) : (
                         <div>{message.content}</div>
                       )}
                       <div className="flex justify-between items-center mt-1">
                         <div
                           className={`text-xs ${
-                            message.senderId === user?.id ? "text-blue-100" : "text-gray-500"
+                            message.senderId === user?.id
+                              ? "text-blue-100"
+                              : "text-gray-500"
                           }`}
                         >
                           {new Date(message.timestamp).toLocaleTimeString([], {
@@ -390,8 +408,9 @@ const ChatWidget: React.FC = () => {
           <div className="p-3 bg-white border-t border-gray-200">
             {activeRecipient && (
               <div className="text-sm text-gray-600 mb-2">
-                Messaging: <span className="font-medium">{activeRecipient.name}</span>
-                <button 
+                Messaging:{" "}
+                <span className="font-medium">{activeRecipient.name}</span>
+                <button
                   onClick={() => setActiveRecipient(null)}
                   className="ml-2 text-blue-600 hover:text-blue-800"
                 >
@@ -402,11 +421,12 @@ const ChatWidget: React.FC = () => {
             <div className="flex mb-2">
               {/* Chat requests removed as per requirements */}
             </div>
-                          
+
             {activeRecipient && (
               <div className="flex justify-between mb-2">
                 <div className="text-sm text-gray-600">
-                  Chatting with: <span className="font-medium">{activeRecipient.name}</span>
+                  Chatting with:{" "}
+                  <span className="font-medium">{activeRecipient.name}</span>
                 </div>
                 <button
                   onClick={() => deleteChat(activeRecipient.id)}
@@ -416,7 +436,7 @@ const ChatWidget: React.FC = () => {
                 </button>
               </div>
             )}
-                          
+
             <div className="flex">
               <input
                 type="text"
@@ -430,8 +450,8 @@ const ChatWidget: React.FC = () => {
                   }
                 }}
                 placeholder={
-                  activeRecipient 
-                    ? `Message ${activeRecipient.name}...` 
+                  activeRecipient
+                    ? `Message ${activeRecipient.name}...`
                     : "Select a user to message..."
                 }
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
