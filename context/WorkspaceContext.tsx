@@ -2,10 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
-import { 
-  getUserWorkspaces, 
-  Workspace
-} from "../services/workspace.api";
+import { getUserWorkspaces, Workspace } from "../services/workspace.api";
 
 interface WorkspaceContextType {
   workspaces: Workspace[];
@@ -19,20 +16,21 @@ export const WorkspaceContext = createContext<WorkspaceContextType>({
   refreshWorkspaces: async () => {},
 });
 
-
 interface WorkspaceProviderProps {
   children: React.ReactNode;
 }
 
-export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }) => {
+export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({
+  children,
+}) => {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
   const authContext = useContext(AuthContext);
-    const user = authContext?.user;
+  const user = authContext?.user;
 
   const refreshWorkspaces = async () => {
     if (!user) return;
-    
+
     try {
       const userWorkspaces = await getUserWorkspaces();
       setWorkspaces(userWorkspaces);
@@ -40,8 +38,6 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
       console.error("Error refreshing workspaces:", error);
     }
   };
-
-
 
   useEffect(() => {
     const initializeWorkspaceData = async () => {
@@ -63,14 +59,12 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
     initializeWorkspaceData();
   }, [user]);
 
-
-
   return (
-    <WorkspaceContext.Provider 
-      value={{ 
-        workspaces, 
-        loading, 
-        refreshWorkspaces, 
+    <WorkspaceContext.Provider
+      value={{
+        workspaces,
+        loading,
+        refreshWorkspaces,
       }}
     >
       {children}

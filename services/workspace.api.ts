@@ -20,12 +20,9 @@ export const createWorkspace = async (name: string) => {
     const response = await http.post("/workspace/create", { name });
     return response.data.workspace as Workspace;
   } catch (error) {
-
     throw error;
   }
 };
-
-
 
 export const getUserWorkspaces = async () => {
   try {
@@ -46,7 +43,6 @@ export const getWorkspaceById = async (workspaceId: string) => {
     const response = await http.get(`/workspace/${workspaceId}`);
     return response.data.workspace as Workspace;
   } catch (error) {
-
     throw error;
   }
 };
@@ -56,7 +52,6 @@ export const leaveWorkspace = async (workspaceId: string) => {
     const response = await http.delete(`/workspace/leave/${workspaceId}`);
     return response.data;
   } catch (error) {
-
     throw error;
   }
 };
@@ -66,15 +61,19 @@ export const getWorkspaceTasks = async (workspaceId: string) => {
     const response = await http.get(`/task/workspace/${workspaceId}`);
     return response.data.tasks;
   } catch (error) {
-
     throw error;
   }
 };
 
-export const addMembersToWorkspace = async (workspaceId: string, members: string[]) => {
+export const addMembersToWorkspace = async (
+  workspaceId: string,
+  members: string[]
+) => {
   try {
     console.log("Adding members to workspace:", workspaceId, members);
-    const response = await http.post(`/workspace/${workspaceId}/add-members`, { members });
+    const response = await http.post(`/workspace/${workspaceId}/add-members`, {
+      members,
+    });
     console.log("Add members response:", response.data);
     return response.data;
   } catch (error) {
@@ -88,7 +87,6 @@ export const deleteWorkspace = async (workspaceId: string) => {
     const response = await http.delete(`/workspace/${workspaceId}`);
     return response.data;
   } catch (error) {
-
     throw error;
   }
 };

@@ -5,13 +5,13 @@ import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../../hooks/socketHook";
 import { useAuthContext } from "../../hooks/authHook";
 import { MessageCircle, X, Send, Users, Trash2 } from "lucide-react";
-import { 
-  sendPrivateMessage, 
-  deleteMessage, 
+import {
+  sendPrivateMessage,
+  deleteMessage,
   getOnlineUsers as apiGetOnlineUsers,
   getChatMessages,
   ChatMessage as ApiChatMessage,
-  User as ApiUser
+  User as ApiUser,
 } from "../../services/chat.api";
 import { getAllUsers } from "../../services/auth.api";
 import { User as UserType } from "../../types/user";
@@ -27,8 +27,6 @@ interface Message {
   isRead?: boolean;
 }
 
-// Chat requests removed as per requirements
-
 interface OnlineUser {
   id: string;
   name: string;
@@ -43,7 +41,9 @@ const ChatWidget: React.FC = () => {
   const [newMessage, setNewMessage] = useState("");
   const [allUsers, setAllUsers] = useState<UserType[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
-  const [activeRecipient, setActiveRecipient] = useState<OnlineUser | null>(null);
+  const [activeRecipient, setActiveRecipient] = useState<OnlineUser | null>(
+    null
+  );
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -66,7 +66,7 @@ const ChatWidget: React.FC = () => {
         deleted: data.deleted,
         isRead: data.isRead,
       };
-      setMessages(prev => [...prev, message]);
+      setMessages((prev) => [...prev, message]);
     };
 
     const handlePrivateMessage = (data: any) => {
@@ -80,10 +80,8 @@ const ChatWidget: React.FC = () => {
         deleted: data.deleted,
         isRead: data.isRead,
       };
-      setMessages(prev => [...prev, message]);
+      setMessages((prev) => [...prev, message]);
     };
-
-
 
     const handleUserOnline = (userId: string) => {};
 
@@ -119,9 +117,13 @@ const ChatWidget: React.FC = () => {
   const sendMessage = async () => {
     if (!newMessage.trim() || !user || !activeRecipient) return;
 
-        try {
-      const result = await sendPrivateMessage(user.id, activeRecipient.id, newMessage);
-      
+    try {
+      const result = await sendPrivateMessage(
+        user.id,
+        activeRecipient.id,
+        newMessage
+      );
+
       const message: Message = {
         id: result._id,
         senderId: result.sender,
@@ -131,7 +133,7 @@ const ChatWidget: React.FC = () => {
         timestamp: new Date(result.createdAt),
         isRead: result.isRead,
       };
-      setMessages(prev => [...prev, message]);
+      setMessages((prev) => [...prev, message]);
       setNewMessage("");
 
       if (socket) {
@@ -170,18 +172,18 @@ const ChatWidget: React.FC = () => {
     });
   };
 
-  // Chat requests removed as per requirements
-
   const handleDeleteMessage = async (messageId: string) => {
     if (!user) return;
-    
+
     try {
       const result = await deleteMessage(messageId, user.id);
-      
+
       if (result.success) {
-        setMessages(prev => prev.map(msg => 
-          msg.id === messageId ? {...msg, deleted: true} : msg
-        ));
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === messageId ? { ...msg, deleted: true } : msg
+          )
+        );
       } else {
         alert(result.message || "Failed to delete message");
       }
@@ -193,15 +195,17 @@ const ChatWidget: React.FC = () => {
 
   const deleteChat = async (recipientId: string) => {
     if (!user) return;
-    
+
     try {
-      setMessages(prev => prev.map(msg => 
-        (msg.senderId === user?.id && msg.recipientId === recipientId) ||
-        (msg.recipientId === user?.id && msg.senderId === recipientId)
-          ? {...msg, deleted: true}
-          : msg
-      ));
-      
+      setMessages((prev) =>
+        prev.map((msg) =>
+          (msg.senderId === user?.id && msg.recipientId === recipientId) ||
+          (msg.recipientId === user?.id && msg.senderId === recipientId)
+            ? { ...msg, deleted: true }
+            : msg
+        )
+      );
+
       alert("Chat deleted successfully");
     } catch (error) {
       console.error("Error deleting chat:", error);
@@ -216,33 +220,41 @@ const ChatWidget: React.FC = () => {
   useEffect(() => {
     if (user) {
       console.log("Current user:", user);
-      
+
       // Get all users
       getAllUsers()
-        .then(response => {
+        .then((response) => {
           console.log("All users response:", response);
           console.log("Current user ID:", user?.id);
           console.log("All users from API:", response.users);
-          setAllUsers(response.users.filter(u => u.id !== user?.id)); // Exclude current user
+          setAllUsers(response.users.filter((u) => u.id !== user?.id)); // Exclude current user
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Error loading all users:", error);
-          console.error("Error details:", error.response?.data || error.message);
+          console.error(
+            "Error details:",
+            error.response?.data || error.message
+          );
         });
-      
+
       // Get online users
       apiGetOnlineUsers()
-        .then(users => {
+        .then((users) => {
           console.log("Online users response:", users);
-          setOnlineUsers(users.map(apiUser => ({
-            id: apiUser.id,
-            name: `${apiUser.firstName} ${apiUser.lastName}`,
-            role: apiUser.role,
-          })));
+          setOnlineUsers(
+            users.map((apiUser) => ({
+              id: apiUser.id,
+              name: `${apiUser.firstName} ${apiUser.lastName}`,
+              role: apiUser.role,
+            }))
+          );
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Error loading online users:", error);
-          console.error("Error details:", error.response?.data || error.message);
+          console.error(
+            "Error details:",
+            error.response?.data || error.message
+          );
         });
     }
   }, [user]);
@@ -253,7 +265,7 @@ const ChatWidget: React.FC = () => {
       const fetchMessages = async () => {
         try {
           const apiMessages = await getChatMessages(activeRecipient.id);
-          const formattedMessages: Message[] = apiMessages.map(apiMsg => ({
+          const formattedMessages: Message[] = apiMessages.map((apiMsg) => ({
             id: apiMsg._id,
             senderId: apiMsg.sender,
             senderName: "", // We'll need to populate this from user data
@@ -263,24 +275,28 @@ const ChatWidget: React.FC = () => {
             deleted: apiMsg.deleted,
             isRead: apiMsg.isRead,
           }));
-          
+
           // Get user names for the messages
-          const updatedMessages = await Promise.all(formattedMessages.map(async msg => {
-            const senderUser = await getAllUsers().then(res => 
-              res.users.find((u: UserType) => u.id === msg.senderId)
-            );
-            return {
-              ...msg,
-              senderName: senderUser ? `${senderUser.firstName} ${senderUser.lastName}` : 'Unknown User',
-            };
-          }));
-          
+          const updatedMessages = await Promise.all(
+            formattedMessages.map(async (msg) => {
+              const senderUser = await getAllUsers().then((res) =>
+                res.users.find((u: UserType) => u.id === msg.senderId)
+              );
+              return {
+                ...msg,
+                senderName: senderUser
+                  ? `${senderUser.firstName} ${senderUser.lastName}`
+                  : "Unknown User",
+              };
+            })
+          );
+
           setMessages(updatedMessages);
         } catch (error) {
-          console.error('Error fetching messages:', error);
+          console.error("Error fetching messages:", error);
         }
       };
-      
+
       fetchMessages();
     }
   }, [activeRecipient, user]);
@@ -292,7 +308,7 @@ const ChatWidget: React.FC = () => {
         className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all z-50"
       >
         <MessageCircle size={24} />
-        {messages.some(m => !m.recipientId) && (
+        {messages.some((m) => !m.recipientId) && (
           <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full"></span>
         )}
       </button>
@@ -304,7 +320,7 @@ const ChatWidget: React.FC = () => {
               <MessageCircle className="mr-2" />
               <h3 className="font-bold">Team Chat</h3>
             </div>
-            <button 
+            <button
               onClick={toggleChat}
               className="text-white hover:text-gray-200"
             >
@@ -315,37 +331,47 @@ const ChatWidget: React.FC = () => {
           <div className="p-3 bg-gray-50 border-b border-gray-200">
             <div className="flex items-center mb-2">
               <Users size={16} className="mr-2 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">All Users</span>
+              <span className="text-sm font-medium text-gray-700">
+                All Users
+              </span>
             </div>
             <div className="flex flex-wrap gap-2">
               {allUsers.length === 0 ? (
                 <p className="text-sm text-gray-500">No users available</p>
               ) : (
                 allUsers.map((userItem: UserType) => {
-                  const isOnline = onlineUsers.some(onlineUser => onlineUser.id === userItem.id);
+                  const isOnline = onlineUsers.some(
+                    (onlineUser) => onlineUser.id === userItem.id
+                  );
                   return (
                     <button
                       key={userItem.id}
-                      onClick={() => setActiveRecipient({
-                        id: userItem.id,
-                        name: `${userItem.firstName} ${userItem.lastName}`,
-                        role: userItem.role
-                      })}
+                      onClick={() =>
+                        setActiveRecipient({
+                          id: userItem.id,
+                          name: `${userItem.firstName} ${userItem.lastName}`,
+                          role: userItem.role,
+                        })
+                      }
                       className={`flex items-center px-2 py-1 rounded-full text-xs ${
                         activeRecipient?.id === userItem.id
                           ? "bg-blue-100 text-blue-800 border border-blue-300"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      {isOnline && <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>}
-                      {!isOnline && <div className="w-2 h-2 bg-gray-400 rounded-full mr-1"></div>}
+                      {isOnline && (
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+                      )}
+                      {!isOnline && (
+                        <div className="w-2 h-2 bg-gray-400 rounded-full mr-1"></div>
+                      )}
                       {userItem.firstName} {userItem.lastName}
                     </button>
                   );
                 })
               )}
             </div>
-            
+
             {/* Chat requests removed as per requirements */}
           </div>
 
@@ -360,7 +386,9 @@ const ChatWidget: React.FC = () => {
                   <div
                     key={message.id}
                     className={`flex ${
-                      message.senderId === user?.id ? "justify-end" : "justify-start"
+                      message.senderId === user?.id
+                        ? "justify-end"
+                        : "justify-start"
                     }`}
                   >
                     <div
@@ -376,14 +404,18 @@ const ChatWidget: React.FC = () => {
                         </div>
                       )}
                       {message.deleted ? (
-                        <div className="italic text-gray-500">This message was deleted</div>
+                        <div className="italic text-gray-500">
+                          This message was deleted
+                        </div>
                       ) : (
                         <div>{message.content}</div>
                       )}
                       <div className="flex justify-between items-center mt-1">
                         <div
                           className={`text-xs ${
-                            message.senderId === user?.id ? "text-blue-100" : "text-gray-500"
+                            message.senderId === user?.id
+                              ? "text-blue-100"
+                              : "text-gray-500"
                           }`}
                         >
                           {new Date(message.timestamp).toLocaleTimeString([], {
@@ -426,8 +458,9 @@ const ChatWidget: React.FC = () => {
           <div className="p-3 bg-white border-t border-gray-200">
             {activeRecipient && (
               <div className="text-sm text-gray-600 mb-2">
-                Messaging: <span className="font-medium">{activeRecipient.name}</span>
-                <button 
+                Messaging:{" "}
+                <span className="font-medium">{activeRecipient.name}</span>
+                <button
                   onClick={() => setActiveRecipient(null)}
                   className="ml-2 text-blue-600 hover:text-blue-800"
                 >
@@ -438,11 +471,12 @@ const ChatWidget: React.FC = () => {
             <div className="flex mb-2">
               {/* Chat requests removed as per requirements */}
             </div>
-                          
+
             {activeRecipient && (
               <div className="flex justify-between mb-2">
                 <div className="text-sm text-gray-600">
-                  Chatting with: <span className="font-medium">{activeRecipient.name}</span>
+                  Chatting with:{" "}
+                  <span className="font-medium">{activeRecipient.name}</span>
                 </div>
                 <button
                   onClick={() => deleteChat(activeRecipient.id)}
@@ -452,7 +486,7 @@ const ChatWidget: React.FC = () => {
                 </button>
               </div>
             )}
-                          
+
             <div className="flex">
               <input
                 type="text"
@@ -466,8 +500,8 @@ const ChatWidget: React.FC = () => {
                   }
                 }}
                 placeholder={
-                  activeRecipient 
-                    ? `Message ${activeRecipient.name}...` 
+                  activeRecipient
+                    ? `Message ${activeRecipient.name}...`
                     : "Select a user to message..."
                 }
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
