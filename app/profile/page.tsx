@@ -14,7 +14,7 @@ import {
   Save,
   X,
 } from "lucide-react";
-import { useAuthContext } from "@/context/AuthContext";
+import { useAuthContext } from "@/hooks/authHook";
 import toast from "react-hot-toast";
 
 export default function ProfilePage() {

@@ -3,12 +3,23 @@ import http from "./http";
 export interface Notification {
   _id: string;
   recipient: string;
-  type: string;
-  task: string;
+  type: "task_assigned" | "task_updated" | "task_completed" | "workspace_added" | "task_created" | "workspace_updated";
+  task: string | null;
   message: string;
   isRead: boolean;
   createdAt: string;
   updatedAt: string;
+  metadata?: {
+    taskTitle?: string;
+    previousStatus?: string;
+    newStatus?: string;
+    assignedBy?: string;
+    workspaceName?: string;
+    workspaceId?: string;
+    addedBy?: string;
+    addedUsers?: Array<{ id: string; name: string }>;
+    createdBy?: string;
+  };
 }
 
 export const getUserNotifications = async (userId: string, unreadOnly?: boolean) => {

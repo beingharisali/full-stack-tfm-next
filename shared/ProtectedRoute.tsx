@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuthContext } from "@/context/AuthContext";
+import { useAuthContext } from "@/hooks/authHook";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 

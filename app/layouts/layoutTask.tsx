@@ -3,16 +3,14 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuthContext } from "../../context/AuthContext";
-import { useWorkspaceContext } from "../../context/WorkspaceContext";
+import { useAuthContext } from "../../hooks/authHook";
+import { useWorkspaceContext } from "../../hooks/workspaceHook";
 
 const LayoutTask = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const { user } = useAuthContext();
-  const { invitations } = useWorkspaceContext();
+  const {} = useWorkspaceContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const hasPendingInvitations = invitations.some(inv => inv.status === "pending");
 
   const navLinks = [
     { name: "Tasks", href: "/tasks" },
@@ -46,11 +44,7 @@ const LayoutTask = ({ children }: { children: React.ReactNode }) => {
                   } group flex items-center px-2 py-2 text-sm font-medium rounded-md`}
                 >
                   {link.name}
-                  {link.name === "Workspaces" && hasPendingInvitations && (
-                    <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                      {invitations.filter(inv => inv.status === "pending").length}
-                    </span>
-                  )}
+                  
                 </Link>
               ))}
             </nav>
@@ -114,11 +108,7 @@ const LayoutTask = ({ children }: { children: React.ReactNode }) => {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {link.name}
-                    {link.name === "Workspaces" && hasPendingInvitations && (
-                      <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                        {invitations.filter(inv => inv.status === "pending").length}
-                      </span>
-                    )}
+                    
                   </Link>
                 ))}
               </nav>

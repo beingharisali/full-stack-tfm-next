@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import Nav from "@/app/component/Navbar";
-import ProtectedRoute from "@/shared/ProtectedRoute";
+import { useAgentDashboard } from "@/hooks/agentHook";
 import {
   ArrowUp,
   ListChecks,
@@ -20,21 +19,10 @@ import {
   UserCircle,
   Folder,
 } from "lucide-react";
-import { getTasks, Task } from "@/services/task.api";
 
 export default function page() {
+  const { tasks, activityLog, loading, stats } = useAgentDashboard();
   const router = useRouter();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [activityLog, setActivityLog] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalTasks: 0,
-    pendingTasks: 0,
-    inProgressTasks: 0,
-    completedTasks: 0,
-    overdueTasks: 0,
-    recentActivities: 0,
-  });
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -43,100 +31,7 @@ export default function page() {
     });
   };
 
-  useEffect(() => {
-    const fetchActivities = async () => {
-      try {
-        const fetchedTasks = await getTasks();
-        setTasks(fetchedTasks);
-
-        const totalTasks = fetchedTasks.length;
-        const pendingTasks = fetchedTasks.filter(
-          (task) => task.status === "pending"
-        ).length;
-        const inProgressTasks = fetchedTasks.filter(
-          (task) => task.status === "in progress"
-        ).length;
-        const completedTasks = fetchedTasks.filter(
-          (task) => task.status === "completed"
-        ).length;
-
-        const overdueTasks = fetchedTasks.filter((task) => {
-          if (task.status === "completed" || !task.dueDate) return false;
-          const dueDate = new Date(task.dueDate);
-          return dueDate < new Date();
-        }).length;
-
-        setStats({
-          totalTasks,
-          pendingTasks,
-          inProgressTasks,
-          completedTasks,
-          overdueTasks,
-          recentActivities: 0,
-        });
-
-        const logs: any[] = [];
-
-        fetchedTasks.forEach((task: Task) => {
-          if (task.createdAt) {
-            logs.push({
-              id: `${task._id}-created`,
-              message: `Task "${task.title}" was created`,
-              user: task.assigneeName || "Unknown User",
-              role: "user",
-              time: task.createdAt,
-              type: "created",
-              taskId: task._id,
-            });
-          }
-
-          if (task.updatedAt && task.updatedAt !== task.createdAt) {
-            let statusText = "";
-            switch (task.status) {
-              case "pending":
-                statusText = "moved to pending";
-                break;
-              case "in progress":
-                statusText = "started working on";
-                break;
-              case "completed":
-                statusText = "completed";
-                break;
-              default:
-                statusText = `changed status to ${task.status}`;
-            }
-
-            logs.push({
-              id: `${task._id}-updated`,
-              message: `Task "${task.title}" was ${statusText}`,
-              user: task.assigneeName || "Unknown User",
-              role: "user",
-              time: task.updatedAt,
-              type: "updated",
-              taskId: task._id,
-            });
-          }
-        });
-
-        logs.sort(
-          (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
-        );
-
-        const recentLogs = logs.slice(0, 15);
-        setActivityLog(recentLogs);
-        setStats((prev) => ({
-          ...prev,
-          recentActivities: recentLogs.length,
-        }));
-      } catch (error) {
-        console.error("Failed to fetch activities:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchActivities();
-  }, []);
+  // All data fetching and state management is handled by the useAgentDashboard hook
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -175,8 +70,7 @@ export default function page() {
   };
 
   return (
-    <ProtectedRoute requiredRole="agent">
-      <Nav />
+    <>
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-100 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -448,6 +342,6 @@ export default function page() {
       >
         <ArrowUp className="w-6 h-6" />
       </button>
-    </ProtectedRoute>
+    </>
   );
 }

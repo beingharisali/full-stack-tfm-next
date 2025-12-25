@@ -1,24 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import Nav from "@/app/component/Navbar";
-import ProtectedRoute from "@/shared/ProtectedRoute";
+import { useUserDashboard } from "@/hooks/userHook";
 import { ArrowUp, ListChecks, Clipboard, Clock, CheckCircle, Play, Calendar, User, Folder } from "lucide-react";
-import { getTasks, Task } from "@/services/task.api";
 
 export default function page() {
+	const { tasks, loading, stats } = useUserDashboard();
 	const router = useRouter();
-	const [tasks, setTasks] = useState<Task[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [stats, setStats] = useState({
-		total: 0,
-		pending: 0,
-		inProgress: 0,
-		completed: 0,
-		completedToday: 0,
-		overdue: 0
-	});
 
 	const scrollToTop = () => {
 		window.scrollTo({
@@ -27,53 +16,10 @@ export default function page() {
 		});
 	};
 
-	useEffect(() => {
-		const fetchTasks = async () => {
-			try {
-				const fetchedTasks = await getTasks();
-				setTasks(fetchedTasks);
-				
-				const total = fetchedTasks.length;
-				const pending = fetchedTasks.filter(task => task.status === "pending").length;
-				const inProgress = fetchedTasks.filter(task => task.status === "in progress").length;
-				const completed = fetchedTasks.filter(task => task.status === "completed").length;
-				
-				const today = new Date();
-				today.setHours(0, 0, 0, 0);
-				const completedToday = fetchedTasks.filter(task => {
-					if (task.status !== "completed" || !task.updatedAt) return false;
-					const completedDate = new Date(task.updatedAt);
-					completedDate.setHours(0, 0, 0, 0);
-					return completedDate.getTime() === today.getTime();
-				}).length;
-				
-				const overdue = fetchedTasks.filter(task => {
-					if (task.status === "completed" || !task.dueDate) return false;
-					const dueDate = new Date(task.dueDate);
-					return dueDate < new Date();
-				}).length;
-				
-				setStats({
-					total,
-					pending,
-					inProgress,
-					completed,
-					completedToday,
-					overdue
-				});
-			} catch (error) {
-				console.error("Failed to fetch tasks:", error);
-			} finally {
-				setLoading(false);
-			}
-		};
-		
-		fetchTasks();
-	}, []);
+	// All data fetching and state management is handled by the useUserDashboard hook
 
 	return (
-		<ProtectedRoute requiredRole="user">
-			<Nav />
+		<>
 			<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8">
 				<div className="max-w-7xl mx-auto">
 					<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -299,6 +245,6 @@ export default function page() {
 			>
 				<ArrowUp className="w-6 h-6" />
 			</button>
-		</ProtectedRoute>
+		</>
 	);
 }
