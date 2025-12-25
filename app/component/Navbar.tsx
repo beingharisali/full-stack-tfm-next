@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { LogOut, Bell, X, User } from "lucide-react";
-import { useAuthContext } from "@/context/AuthContext";
-import { useSocket } from "@/context/SocketContext";
+import { useAuthContext } from "@/hooks/authHook";
+import { useSocket } from "@/hooks/socketHook";
 import {
   getUnreadNotificationCount,
   markAllNotificationsAsRead,
@@ -16,14 +16,12 @@ function Nav() {
   const { socket } = useSocket();
   const router = useRouter();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [notifications, setNotifications] = useState<string[]>([
-    "New task assigned: Design Dashboard",
-    "Task updated: Fix Login Bug",
-  ]);
+  const [notifications, setNotifications] = useState<string[]>([]);
   const [activityLog, setActivityLog] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [receivedNotifications, setReceivedNotifications] = useState<any[]>([]);
 
   const notificationRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -90,6 +88,9 @@ function Nav() {
     if (socket) {
       const handleNewNotification = (notification: any) => {
         setHasUnreadNotifications(true);
+        setReceivedNotifications(prev => [notification, ...prev]);
+        
+
       };
 
       socket.on("notification", handleNewNotification);
@@ -150,14 +151,31 @@ function Nav() {
             {showNotifications && (
               <div className='absolute right-0 mt-3 w-64 bg-white/90 backdrop-blur-md shadow-xl rounded-xl p-4 text-black z-50'>
                 <h3 className='font-bold text-lg mb-3'>Notifications</h3>
-                {notifications.length > 0 ? (
-                  notifications.map((note, index) => (
-                    <div
-                      key={index}
-                      className='p-2 mb-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition'>
-                      {note}
-                    </div>
-                  ))
+                {(notifications.length > 0 || receivedNotifications.length > 0) ? (
+                  <>
+                    {receivedNotifications.map((note, index) => (
+                      <div
+                        key={`received-${note._id || index}`}
+                        className='p-2 mb-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition border-l-4 border-blue-500'>
+                        <div className='font-medium'>{note.message || 'New notification received'}</div>
+                        <div className='text-xs text-gray-500 mt-1'>
+                          {new Date(note.createdAt || Date.now()).toLocaleString()}
+                        </div>
+                        {note.type && (
+                          <span className='inline-block px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 mt-1'>
+                            {note.type.replace('_', ' ').toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                    {notifications.map((note, index) => (
+                      <div
+                        key={`static-${index}`}
+                        className='p-2 mb-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition'>
+                        {note}
+                      </div>
+                    ))}
+                  </>
                 ) : (
                   <p className='text-gray-600'>No new notifications</p>
                 )}

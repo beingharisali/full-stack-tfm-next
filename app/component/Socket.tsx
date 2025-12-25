@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSocket } from "@/context/SocketContext";
+import { useSocket } from "@/hooks/socketHook";
 import { emitEvent, onEvent, offEvent } from "@/lib/socket.utils";
 
 export default function SocketExample() {

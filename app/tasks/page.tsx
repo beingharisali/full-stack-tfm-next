@@ -32,7 +32,6 @@ export default function TasksPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterPriority, setFilterPriority] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
-
   const [currentPage, setCurrentPage] = useState(1);
   const tasksPerPage = 5;
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
@@ -44,10 +43,8 @@ export default function TasksPage() {
       const fetchedTasks = await getTasks();
       setTasks(fetchedTasks);
     } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message || err.message || "Failed to fetch tasks";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      setError(err.message || "Failed to fetch tasks");
+      toast.error("Failed to fetch tasks");
     } finally {
       setTasksLoading(false);
     }
@@ -65,91 +62,74 @@ export default function TasksPage() {
     if (task.assigneeName) {
       return task.assigneeName;
     }
-    return task.assigneeEmail || "Unassigned";
+    if (task.assigneeEmail) {
+      return task.assigneeEmail.split('@')[0];
+    }
+    return 'Unassigned';
   };
 
   const filteredTasks = useMemo(() => {
-    const term = searchQuery.toLowerCase();
-    return tasks.filter((task: Task) => {
-      const matchesStatus =
-        filterStatus === "all" || task.status === filterStatus;
-      const matchesPriority =
-        filterPriority === "all" || task.priority === filterPriority;
-
-      let matchesSearch = true;
-      if (term) {
-        const assigneeName = task.assigneeName?.toLowerCase() || "";
-        const assigneeEmail = task.assigneeEmail?.toLowerCase() || "";
-        const taskTitle = task.title.toLowerCase();
-        const taskDescription = task.description.toLowerCase();
-
-        matchesSearch =
-          assigneeName.includes(term) ||
-          assigneeEmail.includes(term) ||
-          taskTitle.includes(term) ||
-          taskDescription.includes(term);
-      }
+    return tasks.filter(task => {
+      const matchesStatus = filterStatus === "all" || task.status?.toLowerCase() === filterStatus.toLowerCase();
+      const matchesPriority = filterPriority === "all" || task.priority?.toLowerCase() === filterPriority.toLowerCase();
+      const matchesSearch = task.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           task.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      
       return matchesStatus && matchesPriority && matchesSearch;
     });
   }, [tasks, filterStatus, filterPriority, searchQuery]);
 
-  const totalPages = useMemo(() => {
-    return Math.ceil(filteredTasks.length / tasksPerPage);
-  }, [filteredTasks.length, tasksPerPage]);
+  const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
 
-  const currentTasks = useMemo(() => {
+  const paginatedTasks = useMemo(() => {
     const startIndex = (currentPage - 1) * tasksPerPage;
     return filteredTasks.slice(startIndex, startIndex + tasksPerPage);
   }, [filteredTasks, currentPage, tasksPerPage]);
 
   const kanbanColumns = useMemo(() => {
     return {
-      pending: filteredTasks.filter((task: Task) => task.status === "pending"),
-      "in progress": filteredTasks.filter(
-        (task: Task) => task.status === "in progress"
-      ),
-      completed: filteredTasks.filter(
-        (task: Task) => task.status === "completed"
-      ),
+      pending: filteredTasks.filter(task => task.status?.toLowerCase() === 'pending'),
+      'in progress': filteredTasks.filter(task => task.status?.toLowerCase() === 'in progress'),
+      completed: filteredTasks.filter(task => task.status?.toLowerCase() === 'completed'),
     };
   }, [filteredTasks]);
 
-  const handleDragStart = (e: React.DragEvent, taskId: string) => {
-    e.dataTransfer.setData("taskId", taskId);
+  const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, task: Task) => {
+    setDraggedTask(task);
+    e.dataTransfer.setData('text/plain', task._id || '');
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
 
-  const handleDrop = async (
-    e: React.DragEvent,
-    newStatus: "pending" | "in progress" | "completed"
-  ) => {
+  const handleDrop = async (e: React.DragEvent, newStatus: "pending" | "in progress" | "completed") => {
     e.preventDefault();
-    const taskId = e.dataTransfer.getData("taskId");
-    const task = tasks.find((t: Task) => t._id === taskId);
-    if (task && task.status !== newStatus) {
+    if (draggedTask) {
       try {
-        await updateTaskApi(taskId, { ...task, status: newStatus });
-        await fetchTasks();
-        toast.success("Task updated successfully!");
-      } catch (err: any) {
-        toast.error(err.response?.data?.message || "Failed to update task");
+        const updatedTask = await updateTaskApi(draggedTask._id!, { status: newStatus });
+        setTasks(prev => prev.map(t => t._id === draggedTask._id ? updatedTask : t));
+        toast.success("Task status updated successfully");
+      } catch (error) {
+        console.error("Error updating task status:", error);
+        toast.error("Failed to update task status");
       }
+      setDraggedTask(null);
     }
   };
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSaveTask = async (task: Task) => {
     setFormLoading(true);
     try {
       if (task._id) {
+        // Update existing task
         await updateTaskApi(task._id, {
           title: task.title,
           description: task.description,
@@ -161,6 +141,7 @@ export default function TasksPage() {
         });
         toast.success("Task updated successfully!");
       } else {
+        // Create new task
         await createTaskApi({
           title: task.title,
           description: task.description,
@@ -174,7 +155,7 @@ export default function TasksPage() {
       }
       setEditingTask(undefined);
       setShowFormModal(false);
-      await fetchTasks();
+      fetchTasks();
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to save task");
     } finally {
@@ -197,7 +178,7 @@ export default function TasksPage() {
       try {
         await deleteTaskApi(id);
         toast.success("Task deleted successfully!");
-        await fetchTasks();
+        fetchTasks();
         if (
           currentPage > Math.ceil((filteredTasks.length - 1) / tasksPerPage) &&
           currentPage > 1
@@ -305,10 +286,10 @@ export default function TasksPage() {
         <Nav />
         <div className='container mx-auto p-4 md:p-6'>
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push("/")}
             className='flex items-center text-blue-600 hover:text-blue-800 mb-4 transition-colors'>
             <ArrowLeft className='mr-2' />
-            Back
+            Back to Dashboard
           </button>
 
           <div className='flex flex-col md:flex-row md:items-center md:justify-between mb-6'>
@@ -397,7 +378,7 @@ export default function TasksPage() {
 
           <div className='bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden'>
             <div className='flex items-center justify-between p-6 border-b border-gray-200'>
-              <h2 className='text-2xl font-bold text-gray-800'>My Tasks</h2>
+              <h2 className='text-2xl font-bold text-gray-800'>Tasks</h2>
               <div className='flex gap-2'>
                 <button
                   onClick={() => setViewMode("kanban")}
@@ -494,7 +475,7 @@ export default function TasksPage() {
                       <div
                         key={task._id}
                         draggable
-                        onDragStart={(e) => handleDragStart(e, task._id!)}
+                        onDragStart={(e) => handleDragStart(e, task)}
                         className='bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 cursor-move'>
                         <div className='flex justify-between items-start mb-2'>
                           <h4 className='font-bold text-gray-900 text-lg'>
@@ -577,7 +558,7 @@ export default function TasksPage() {
                       <div
                         key={task._id}
                         draggable
-                        onDragStart={(e) => handleDragStart(e, task._id!)}
+                        onDragStart={(e) => handleDragStart(e, task)}
                         className='bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 cursor-move'>
                         <div className='flex justify-between items-start mb-2'>
                           <h4 className='font-bold text-gray-900 text-lg'>
@@ -660,7 +641,7 @@ export default function TasksPage() {
                       <div
                         key={task._id}
                         draggable
-                        onDragStart={(e) => handleDragStart(e, task._id!)}
+                        onDragStart={(e) => handleDragStart(e, task)}
                         className='bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 cursor-move'>
                         <div className='flex justify-between items-start mb-2'>
                           <h4 className='font-bold text-gray-900 text-lg'>
@@ -728,7 +709,7 @@ export default function TasksPage() {
             ) : (
               <>
                 <div className='space-y-4 p-6'>
-                  {currentTasks.map((task) => (
+                  {paginatedTasks.map((task) => (
                     <div
                       key={task._id}
                       className='flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-5 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-all duration-300'>
@@ -767,8 +748,8 @@ export default function TasksPage() {
                             className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusTagStyle(
                               task.status
                             )}`}>
-                            {task.status.charAt(0).toUpperCase() +
-                              task.status.slice(1)}
+                            {task.status?.charAt(0).toUpperCase() +
+                              task.status?.slice(1)}
                           </span>
                           {(task.assigneeName || task.assigneeEmail) && (
                             <span className='flex items-center text-gray-500'>

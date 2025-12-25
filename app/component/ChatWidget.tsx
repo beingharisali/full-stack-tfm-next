@@ -2,14 +2,19 @@
 
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
-import { useSocket } from "../../context/SocketContext";
-import { useAuthContext } from "../../context/AuthContext";
-import { MessageCircle, X, Send, User, Users, Trash2 } from "lucide-react";
+import { useSocket } from "../../hooks/socketHook";
+import { useAuthContext } from "../../hooks/authHook";
+import { MessageCircle, X, Send, Users, Trash2 } from "lucide-react";
 import { 
   sendPrivateMessage, 
   deleteMessage, 
-  getOnlineUsers as apiGetOnlineUsers
+  getOnlineUsers as apiGetOnlineUsers,
+  getChatMessages,
+  ChatMessage as ApiChatMessage,
+  User as ApiUser
 } from "../../services/chat.api";
+import { getAllUsers } from "../../services/auth.api";
+import { User as UserType } from "../../types/user";
 
 interface Message {
   id: string;
@@ -19,6 +24,7 @@ interface Message {
   content: string;
   timestamp: Date;
   deleted?: boolean;
+  isRead?: boolean;
 }
 
 // Chat requests removed as per requirements
@@ -35,11 +41,11 @@ const ChatWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [allUsers, setAllUsers] = useState<UserType[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [activeRecipient, setActiveRecipient] = useState<OnlineUser | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState("");
-  // Chat requests removed as per requirements
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,12 +58,13 @@ const ChatWidget: React.FC = () => {
     const handleMessage = (data: any) => {
       const message: Message = {
         id: data._id || Date.now().toString(),
-        senderId: data.senderId,
+        senderId: data.sender,
         senderName: data.senderName,
-        recipientId: data.recipientId,
-        content: data.content,
-        timestamp: new Date(data.timestamp),
+        recipientId: data.receiver,
+        content: data.message,
+        timestamp: new Date(data.timestamp || data.createdAt),
         deleted: data.deleted,
+        isRead: data.isRead,
       };
       setMessages(prev => [...prev, message]);
     };
@@ -65,58 +72,18 @@ const ChatWidget: React.FC = () => {
     const handlePrivateMessage = (data: any) => {
       const message: Message = {
         id: data._id || Date.now().toString(),
-        senderId: data.senderId,
+        senderId: data.sender,
         senderName: data.senderName,
-        recipientId: data.recipientId,
-        content: data.content,
-        timestamp: new Date(data.timestamp),
+        recipientId: data.receiver,
+        content: data.message,
+        timestamp: new Date(data.timestamp || data.createdAt),
         deleted: data.deleted,
+        isRead: data.isRead,
       };
       setMessages(prev => [...prev, message]);
     };
 
-    const handleChatRequest = (data: any) => {
-      const request: ChatRequest = {
-        id: data._id || data.id,
-        requesterId: data.requester,
-        requesterName: data.requesterName,
-        recipientId: data.recipient,
-        recipientEmail: data.recipientEmail,
-        status: data.status,
-        timestamp: new Date(data.createdAt),
-      };
-      setChatRequests(prev => [...prev, request]);
-    };
 
-    const handleChatRequestResponse = (data: any) => {
-      setChatRequests(prev => prev.map(req => 
-        req.id === data.requestId ? {...req, status: data.status} : req
-      ));
-      
-      if (data.status === 'accepted') {
-        const connection: ChatConnection = {
-          id: data.connectionId || Date.now().toString(),
-          user1Id: data.user1Id || data.requesterId,
-          user2Id: data.user2Id || data.recipientId,
-          user1Email: data.user1Email || "",
-          user2Email: data.user2Email || "",
-          createdAt: new Date(data.createdAt || Date.now()),
-        };
-        setChatConnections(prev => [...prev, connection]);
-      }
-    };
-
-    const handleNewConnection = (data: any) => {
-      const connection: ChatConnection = {
-        id: data.connectionId,
-        user1Id: data.user1Id,
-        user2Id: data.user2Id,
-        user1Email: data.user1Email,
-        user2Email: data.user2Email,
-        createdAt: new Date(),
-      };
-      setChatConnections(prev => [...prev, connection]);
-    };
 
     const handleUserOnline = (userId: string) => {};
 
@@ -152,16 +119,17 @@ const ChatWidget: React.FC = () => {
   const sendMessage = async () => {
     if (!newMessage.trim() || !user || !activeRecipient) return;
 
-    try {
+        try {
       const result = await sendPrivateMessage(user.id, activeRecipient.id, newMessage);
       
       const message: Message = {
         id: result._id,
-        senderId: user.id,
+        senderId: result.sender,
         senderName: `${user.firstName} ${user.lastName}`,
-        recipientId: activeRecipient.id,
-        content: newMessage,
+        recipientId: result.receiver,
+        content: result.message,
         timestamp: new Date(result.createdAt),
+        isRead: result.isRead,
       };
       setMessages(prev => [...prev, message]);
       setNewMessage("");
@@ -169,10 +137,10 @@ const ChatWidget: React.FC = () => {
       if (socket) {
         socket.emit("privateMessage", {
           _id: result._id,
-          senderId: user.id,
+          senderId: result.sender,
           senderName: `${user.firstName} ${user.lastName}`,
-          recipientId: activeRecipient.id,
-          content: newMessage,
+          recipientId: result.receiver,
+          content: result.message,
           timestamp: new Date().toISOString(),
         });
       }
@@ -247,19 +215,75 @@ const ChatWidget: React.FC = () => {
 
   useEffect(() => {
     if (user) {
+      console.log("Current user:", user);
+      
+      // Get all users
+      getAllUsers()
+        .then(response => {
+          console.log("All users response:", response);
+          console.log("Current user ID:", user?.id);
+          console.log("All users from API:", response.users);
+          setAllUsers(response.users.filter(u => u.id !== user?.id)); // Exclude current user
+        })
+        .catch(error => {
+          console.error("Error loading all users:", error);
+          console.error("Error details:", error.response?.data || error.message);
+        });
+      
+      // Get online users
       apiGetOnlineUsers()
         .then(users => {
-          setOnlineUsers(users.map(user => ({
-            id: user.id,
-            name: `${user.firstName} ${user.lastName}`,
-            role: user.role,
+          console.log("Online users response:", users);
+          setOnlineUsers(users.map(apiUser => ({
+            id: apiUser.id,
+            name: `${apiUser.firstName} ${apiUser.lastName}`,
+            role: apiUser.role,
           })));
         })
         .catch(error => {
           console.error("Error loading online users:", error);
+          console.error("Error details:", error.response?.data || error.message);
         });
     }
   }, [user]);
+
+  // Fetch messages when active recipient changes
+  useEffect(() => {
+    if (activeRecipient && user) {
+      const fetchMessages = async () => {
+        try {
+          const apiMessages = await getChatMessages(activeRecipient.id);
+          const formattedMessages: Message[] = apiMessages.map(apiMsg => ({
+            id: apiMsg._id,
+            senderId: apiMsg.sender,
+            senderName: "", // We'll need to populate this from user data
+            recipientId: apiMsg.receiver,
+            content: apiMsg.message,
+            timestamp: new Date(apiMsg.createdAt),
+            deleted: apiMsg.deleted,
+            isRead: apiMsg.isRead,
+          }));
+          
+          // Get user names for the messages
+          const updatedMessages = await Promise.all(formattedMessages.map(async msg => {
+            const senderUser = await getAllUsers().then(res => 
+              res.users.find((u: UserType) => u.id === msg.senderId)
+            );
+            return {
+              ...msg,
+              senderName: senderUser ? `${senderUser.firstName} ${senderUser.lastName}` : 'Unknown User',
+            };
+          }));
+          
+          setMessages(updatedMessages);
+        } catch (error) {
+          console.error('Error fetching messages:', error);
+        }
+      };
+      
+      fetchMessages();
+    }
+  }, [activeRecipient, user]);
 
   return (
     <>
@@ -291,23 +315,35 @@ const ChatWidget: React.FC = () => {
           <div className="p-3 bg-gray-50 border-b border-gray-200">
             <div className="flex items-center mb-2">
               <Users size={16} className="mr-2 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">Online Users</span>
+              <span className="text-sm font-medium text-gray-700">All Users</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {onlineUsers.map((onlineUser) => (
-                <button
-                  key={onlineUser.id}
-                  onClick={() => setActiveRecipient(onlineUser)}
-                  className={`flex items-center px-2 py-1 rounded-full text-xs ${
-                    activeRecipient?.id === onlineUser.id
-                      ? "bg-blue-100 text-blue-800 border border-blue-300"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
-                  {onlineUser.name}
-                </button>
-              ))}
+              {allUsers.length === 0 ? (
+                <p className="text-sm text-gray-500">No users available</p>
+              ) : (
+                allUsers.map((userItem: UserType) => {
+                  const isOnline = onlineUsers.some(onlineUser => onlineUser.id === userItem.id);
+                  return (
+                    <button
+                      key={userItem.id}
+                      onClick={() => setActiveRecipient({
+                        id: userItem.id,
+                        name: `${userItem.firstName} ${userItem.lastName}`,
+                        role: userItem.role
+                      })}
+                      className={`flex items-center px-2 py-1 rounded-full text-xs ${
+                        activeRecipient?.id === userItem.id
+                          ? "bg-blue-100 text-blue-800 border border-blue-300"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {isOnline && <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>}
+                      {!isOnline && <div className="w-2 h-2 bg-gray-400 rounded-full mr-1"></div>}
+                      {userItem.firstName} {userItem.lastName}
+                    </button>
+                  );
+                })
+              )}
             </div>
             
             {/* Chat requests removed as per requirements */}

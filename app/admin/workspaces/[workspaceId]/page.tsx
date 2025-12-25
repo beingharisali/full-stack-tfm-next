@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useAuthContext } from "../../../../context/AuthContext";
+import { useAuthContext } from "../../../../hooks/authHook";
 import { useParams, useRouter } from "next/navigation";
 import ProtectedRoute from "../../../../shared/ProtectedRoute";
 import { 
   getWorkspaceById, 
   getWorkspaceTasks, 
-  inviteMembersToWorkspace,
+  addMembersToWorkspace,
   leaveWorkspace
 } from "../../../../services/workspace.api";
 import { 
@@ -57,15 +57,12 @@ const WorkspaceDetailsPage = () => {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   
   const [emailInput, setEmailInput] = useState("");
-  const [userFound, setUserFound] = useState<User | null>(null);
-  const [selectedWorkspace, setSelectedWorkspace] = useState("");
   
   useEffect(() => {
     const fetchData = async () => {
       try {
         const workspaceData = await getWorkspaceById(workspaceId);
         setWorkspace(workspaceData);
-        setSelectedWorkspace(workspaceId);
         
         const workspaceTasks = await getWorkspaceTasks(workspaceId);
         setTasks(workspaceTasks);
@@ -116,7 +113,7 @@ const WorkspaceDetailsPage = () => {
     router.push(`/admin/workspaces/${workspaceId}/tasks`);
   };
 
-  const handleSearchUserByEmail = async () => {
+  const handleAddUserToWorkspace = async () => {
     if (!emailInput.trim()) {
       setError("Please enter an email address");
       return;
@@ -128,48 +125,29 @@ const WorkspaceDetailsPage = () => {
 
     try {
       const response = await getUserByEmail(emailInput);
-      setUserFound(response.user);
-      setSuccess(`User found: ${response.user.firstName} ${response.user.lastName}`);
-    } catch (err: any) {
-      setUserFound(null);
-      if (err.response?.status === 404) {
-        setError("User with this email not found in the system");
-      } else {
-        setError(err.response?.data?.message || "Failed to search for user. Please try again.");
-      }
-      console.error("Error searching for user:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleInviteByEmail = async () => {
-    if (!selectedWorkspace || !userFound) {
-      setError("Please select a workspace and search for a valid user first");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      await inviteMembersToWorkspace(selectedWorkspace, [userFound.id]);
+      const userToAdd = response.user;
+      
+      await addMembersToWorkspace(workspaceId, [userToAdd.id]);
       setEmailInput("");
-      setUserFound(null);
-      setSuccess(`Invitation sent to ${userFound.email} successfully!`);
+      setSuccess(`User ${userToAdd.email} added to workspace successfully!`);
       
       const updatedWorkspace = await getWorkspaceById(workspaceId);
       setWorkspace(updatedWorkspace);
       
       setTimeout(() => setSuccess(""), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to send invitation. Please try again.");
-      console.error("Error inviting member:", err);
+      if (err.response?.status === 404) {
+        setError("User with this email not found in the system");
+      } else {
+        setError(err.response?.data?.message || "Failed to add user to workspace. Please try again.");
+      }
+      console.error("Error adding user to workspace:", err);
     } finally {
       setLoading(false);
     }
   };
+
+
 
   const handleLeaveWorkspace = async () => {
     if (!workspace) return;
@@ -318,12 +296,12 @@ const WorkspaceDetailsPage = () => {
             </div>
             
             <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Invite Members</h2>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Add Members</h2>
               
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Invite by Email
+                    Add User by Email
                   </label>
                   <div className="space-y-3">
                     <div className="flex space-x-2">
@@ -335,31 +313,13 @@ const WorkspaceDetailsPage = () => {
                         className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       <button
-                        onClick={handleSearchUserByEmail}
+                        onClick={handleAddUserToWorkspace}
                         disabled={loading || !emailInput.trim()}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition"
                       >
-                        Search
+                        {loading ? "Adding..." : "Add User"}
                       </button>
                     </div>
-                    
-                    {userFound && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">{userFound.firstName} {userFound.lastName}</p>
-                            <p className="text-sm text-gray-600">{userFound.email} ({userFound.role})</p>
-                          </div>
-                          <button
-                            onClick={handleInviteByEmail}
-                            disabled={loading}
-                            className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 transition text-sm"
-                          >
-                            {loading ? "Inviting..." : "Invite"}
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
                 

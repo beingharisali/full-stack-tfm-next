@@ -2,6 +2,8 @@ import React from "react";
 import { AuthProvider } from "../context/AuthContext";
 import { SocketProvider } from "../context/SocketContext";
 import { WorkspaceProvider } from "../context/WorkspaceContext";
+import ChatWidget from "./component/ChatWidget";
+import AuthLoadingProvider from "./component/AuthLoadingProvider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -24,7 +26,10 @@ export default function RootLayout({
         <AuthProvider>
           <SocketProvider>
             <WorkspaceProvider>
-              {children}
+              <AuthLoadingProvider>
+                {children}
+                <ChatWidget />
+              </AuthLoadingProvider>
             </WorkspaceProvider>
           </SocketProvider>
         </AuthProvider>

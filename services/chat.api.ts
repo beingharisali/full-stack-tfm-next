@@ -1,30 +1,11 @@
 import http from "./http";
 
-export interface ChatRequest {
-  _id: string;
-  requester: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  recipient: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  recipientEmail: string;
-  status: "pending" | "accepted" | "rejected";
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface ChatMessage {
   _id: string;
   sender: string;
-  recipient: string;
-  content: string;
+  receiver: string;
+  message: string;
+  isRead: boolean;
   deleted?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -38,63 +19,24 @@ export interface User {
   role: string;
 }
 
-export const sendChatRequest = async (requesterId: string, requesterName: string, recipientEmail: string) => {
-  try {
-    const response = await http.post("/chat/request", {
-      requesterId,
-      requesterName,
-      recipientEmail,
-    });
-    return response.data;
-  } catch (error) {
-
-    throw error;
-  }
-};
-
-
-export const respondToChatRequest = async (requestId: string, status: "accepted" | "rejected", responderId: string) => {
-  try {
-    const response = await http.post("/chat/request/respond", {
-      requestId,
-      status,
-      responderId,
-    });
-    return response.data;
-  } catch (error) {
-
-    throw error;
-  }
-};
-
-export const getUserChatRequests = async (userId: string) => {
-  try {
-    const response = await http.get(`/chat/requests/${userId}`);
-    return response.data.chatRequests as ChatRequest[];
-  } catch (error) {
-
-    throw error;
-  }
-};
-
 export const sendPrivateMessage = async (senderId: string, recipientId: string, content: string) => {
   try {
-    const response = await http.post("/chat/message", {
+    const response = await http.post("/chat/send", {
       senderId,
-      recipientId,
-      content,
+      receiverId: recipientId,
+      message: content,
     });
-    return response.data.chatMessage as ChatMessage;
+    return response.data as ChatMessage;
   } catch (error) {
 
     throw error;
   }
 };
 
-export const getChatMessages = async (user1Id: string, user2Id: string) => {
+export const getChatMessages = async (userId: string) => {
   try {
-    const response = await http.get(`/chat/messages/${user1Id}/${user2Id}`);
-    return response.data.messages as ChatMessage[];
+    const response = await http.get(`/chat/${userId}`);
+    return response.data as ChatMessage[];
   } catch (error) {
 
     throw error;
@@ -103,7 +45,7 @@ export const getChatMessages = async (user1Id: string, user2Id: string) => {
 
 export const deleteMessage = async (messageId: string, userId: string) => {
   try {
-    const response = await http.delete(`/chat/message/${messageId}`, {
+    const response = await http.delete(`/chat/${messageId}`, {
       data: { userId }
     });
     return response.data;

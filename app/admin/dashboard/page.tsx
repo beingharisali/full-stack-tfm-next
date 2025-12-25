@@ -1,11 +1,10 @@
 "use client";
 
-import Nav from "@/app/component/Navbar";
-import { getTasks, updateTask, Task, deleteTask } from "@/services/task.api";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/context/AuthContext";
-import ProtectedRoute from "@/shared/ProtectedRoute";
+import { useAdminDashboard } from "@/hooks/adminHook";
+import { updateTask, Task, deleteTask } from "@/services/task.api";
+import LoadingSpinner from "@/app/component/LoadingSpinner";
 
 import toast from "react-hot-toast";
 
@@ -19,77 +18,9 @@ import {
   Legend,
 } from "recharts";
 
-function AdminDashboardPage() {
-  const { user } = useAuthContext();
+export default function AdminDashboardPage() {
+  const { user, tasks, activityLog, loading, totalTasks, completedTasks, pendingTasks, overdueTasks, fetchTasks } = useAdminDashboard();
   const router = useRouter();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [activityLog, setActivityLog] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const [totalTasks, setTotalTasks] = useState(0);
-  const [completedTasks, setCompletedTasks] = useState(0);
-  const [pendingTasks, setPendingTasks] = useState(0);
-  const [overdueTasks, setOverdueTasks] = useState(0);
-
-  async function fetchTasks() {
-    setLoading(true);
-    try {
-      const fetchedTasks = await getTasks();
-      setTasks(fetchedTasks);
-
-      let completed = fetchedTasks.filter(
-        (t) => t.status === "completed"
-      ).length;
-      let pending = fetchedTasks.filter((t) => t.status !== "completed").length;
-      let overdue = fetchedTasks.filter(
-        (t) =>
-          t.status !== "completed" &&
-          new Date(t.dueDate).getTime() < new Date().getTime()
-      ).length;
-
-      setTotalTasks(fetchedTasks.length);
-      setCompletedTasks(completed);
-      setPendingTasks(pending);
-      setOverdueTasks(overdue);
-
-
-      const logs: any[] = [];
-      fetchedTasks.forEach((task: Task) => {
-        logs.push({
-          message: `Task "${task.title}" was created by ${task.assigneeName}`,
-          time: task.createdAt,
-          type: "created",
-        });
-
-        if (
-          task.updatedAt &&
-          task.createdAt &&
-          new Date(task.updatedAt).getTime() !==
-            new Date(task.createdAt).getTime()
-        ) {
-          logs.push({
-            message: `Task "${task.title}" was updated by ${user?.firstName} and status changed to "${task.status}"`,
-            time: task.updatedAt,
-            type: "updated",
-          });
-        }
-      });
-
-      logs.sort(
-        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
-      );
-      setActivityLog(logs.slice(0, 10));
-    } catch (error) {
-
-      toast.error("Failed to fetch tasks.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
 
   const handleStatusChange = async (taskId: string, status: Task["status"]) => {
     try {
@@ -126,12 +57,18 @@ function AdminDashboardPage() {
     { name: "Overdue", value: overdueTasks },
   ];
 
-  return (
-    <ProtectedRoute requiredRole="admin">
-      <Nav />
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner message="Loading dashboard data..." />
+      </div>
+    );
+  }
 
-      <div className='flex flex-col md:flex-row mx-4 mt-6 gap-6'>
-        <div className='md:w-2/3 bg-white shadow-lg rounded-xl p-6'>
+  return (
+
+    <div className='flex flex-col md:flex-row mx-4 mt-6 gap-6'>
+      <div className='md:w-2/3 bg-white shadow-lg rounded-xl p-6'>
           <h2 className='text-3xl font-bold text-gray-800 mb-4'>Analytics</h2>
 
           <div className='grid grid-cols-2 gap-4 mb-6'>
@@ -229,8 +166,5 @@ function AdminDashboardPage() {
           )}
         </div>
       </div>
-    </ProtectedRoute>
   );
 }
-
-export default AdminDashboardPage;

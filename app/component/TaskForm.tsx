@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Plus, Edit3 } from "lucide-react";
-import { useWorkspaceContext } from "../../context/WorkspaceContext";
+import { useWorkspaceContext } from "../../hooks/workspaceHook";
 
 interface Task {
   _id?: string;

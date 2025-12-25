@@ -1,64 +1,21 @@
 "use client";
 
-import Nav from "@/app/component/Navbar";
-import { getTasks, updateTask, Task, deleteTask } from "@/services/task.api";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/context/AuthContext";
-import ProtectedRoute from "@/shared/ProtectedRoute";
+import { useAdminTasks } from "@/hooks/adminHook";
+import { Task } from "@/services/task.api";
 import ChatWidget from "@/app/component/ChatWidget";
 
 import toast from "react-hot-toast";
 
-function AdminTasksPage() {
-  const { user } = useAuthContext();
+export default function AdminTasksPage() {
+  const { tasks, loading, fetchTasks, handleStatusChange, handleDeleteTask } = useAdminTasks();
   const router = useRouter();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  async function fetchTasks() {
-    setLoading(true);
-    try {
-      const fetchedTasks = await getTasks();
-      setTasks(fetchedTasks);
-    } catch (error) {
-
-      toast.error("Failed to fetch tasks.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const handleStatusChange = async (taskId: string, status: Task["status"]) => {
-    try {
-      await updateTask(taskId, { status });
-      toast.success("Task status updated!");
-      fetchTasks();
-    } catch (error) {
-
-      toast.error("Failed to update task status.");
-    }
-  };
+  // All task management logic is handled by the useAdminTasks hook
 
   const handleEditClick = (task: Task) => {
 
-  };
-
-  const handleDeleteTask = async (taskId: string) => {
-    if (!confirm("Are you sure you want to delete this task?")) return;
-
-    try {
-      await deleteTask(taskId);
-      toast.success("Task deleted successfully!");
-      fetchTasks();
-    } catch (error) {
-
-      toast.error("Failed to delete task.");
-    }
   };
 
   const getStatusTagStyle = (status: Task["status"]) => {
@@ -90,9 +47,7 @@ function AdminTasksPage() {
   };
 
   return (
-    <ProtectedRoute requiredRole="admin">
-      <Nav />
-
+    <>
       <div className='container mx-auto p-4 md:p-6'>
         <div className='flex flex-col md:flex-row md:items-center md:justify-between mb-6'>
           <h1 className='text-3xl md:text-4xl font-bold text-gray-800 mb-4 md:mb-0'>
@@ -140,88 +95,86 @@ function AdminTasksPage() {
                 </div>
                 <h3 className='text-xl font-semibold text-gray-700 mb-2'>
                   No Tasks Found
-                </h3>
-                <p className='text-gray-500'>
-                  There are currently no tasks in the system.
-                </p>
-              </div>
-            ) : (
-              <div className='overflow-x-auto'>
-                <table className='min-w-full divide-y divide-gray-200'>
-                  <thead className='bg-gray-50'>
-                    <tr>
-                      <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                        Task
-                      </th>
-                      <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                        Assignee
-                      </th>
-                      <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                        Due Date
-                      </th>
-                      <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                        Status
-                      </th>
-                      <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                        Priority
-                      </th>
-                      <th scope='col' className='px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                        Actions
-                      </th>
+              </h3>
+              <p className='text-gray-500'>
+                There are currently no tasks in the system.
+              </p>
+            </div>
+          ) : (
+            <div className='overflow-x-auto'>
+              <table className='min-w-full divide-y divide-gray-200'>
+                <thead className='bg-gray-50'>
+                  <tr>
+                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                      Task
+                    </th>
+                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                      Assignee
+                    </th>
+                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                      Due Date
+                    </th>
+                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                      Status
+                    </th>
+                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                      Priority
+                    </th>
+                    <th scope='col' className='px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className='bg-white divide-y divide-gray-200'>
+                  {tasks.map((task) => (
+                    <tr key={task._id} className='hover:bg-gray-50'>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='text-sm font-medium text-gray-900'>{task.title}</div>
+                        <div className='text-sm text-gray-500 line-clamp-2'>{task.description}</div>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='text-sm text-gray-900'>
+                          {task.assigneeName || "Unassigned"}
+                        </div>
+                        <div className='text-sm text-gray-500'>
+                          {task.assigneeEmail}
+                        </div>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                        {new Date(task.dueDate).toLocaleDateString()}
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusTagStyle(task.status)}`}>
+                          {task.status}
+                        </span>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPriorityTagStyle(task.priority)}`}>
+                          {task.priority}
+                        </span>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium'>
+                        <button
+                          onClick={() => handleEditClick(task)}
+                          className='text-indigo-600 hover:text-indigo-900 mr-3'>
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTask(task._id!)}
+                          className='text-red-600 hover:text-red-900'>
+                          Delete
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className='bg-white divide-y divide-gray-200'>
-                    {tasks.map((task) => (
-                      <tr key={task._id} className='hover:bg-gray-50'>
-                        <td className='px-6 py-4 whitespace-nowrap'>
-                          <div className='text-sm font-medium text-gray-900'>{task.title}</div>
-                          <div className='text-sm text-gray-500 line-clamp-2'>{task.description}</div>
-                        </td>
-                        <td className='px-6 py-4 whitespace-nowrap'>
-                          <div className='text-sm text-gray-900'>
-                            {task.assigneeName || "Unassigned"}
-                          </div>
-                          <div className='text-sm text-gray-500'>
-                            {task.assigneeEmail}
-                          </div>
-                        </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                          {new Date(task.dueDate).toLocaleDateString()}
-                        </td>
-                        <td className='px-6 py-4 whitespace-nowrap'>
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusTagStyle(task.status)}`}>
-                            {task.status}
-                          </span>
-                        </td>
-                        <td className='px-6 py-4 whitespace-nowrap'>
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPriorityTagStyle(task.priority)}`}>
-                            {task.priority}
-                          </span>
-                        </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium'>
-                          <button
-                            onClick={() => handleEditClick(task)}
-                            className='text-indigo-600 hover:text-indigo-900 mr-3'>
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteTask(task._id!)}
-                            className='text-red-600 hover:text-red-900'>
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      <ChatWidget />
-    </ProtectedRoute>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+    <ChatWidget />
+    </>
   );
 }
-
-export default AdminTasksPage;
