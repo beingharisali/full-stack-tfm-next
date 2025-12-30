@@ -15,7 +15,7 @@ import {
   getUserByEmail 
 } from "../../../../services/auth.api";
 import { Task } from "../../../../services/task.api";
-import TaskForm from "../../../../component/TaskForm";
+import TaskForm from "../../../component/TaskForm";
 
 interface Workspace {
   _id: string;

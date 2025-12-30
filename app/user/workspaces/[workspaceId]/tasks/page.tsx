@@ -5,7 +5,7 @@ import { useAuthContext } from "../../../../../hooks/authHook";
 import { useParams, useRouter } from "next/navigation";
 import { getWorkspaceTasks, getWorkspaceById } from "../../../../../services/workspace.api";
 import { createTask, updateTask, deleteTask, Task } from "../../../../../services/task.api";
-import TaskForm from "../../../../../app/component/TaskForm";
+import TaskForm from "../../../../component/TaskForm";
 import Pagination from "../../../../../app/component/Pagination";
 import ChatWidget from "../../../../../app/component/ChatWidget";
 import Modal from "../../../../../app/component/Modal";

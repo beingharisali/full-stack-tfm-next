@@ -5,10 +5,7 @@ import { WorkspaceProvider } from "../context/WorkspaceContext";
 import ChatWidget from "./component/ChatWidget";
 import AuthLoadingProvider from "./component/AuthLoadingProvider";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "TaskFlow Manager",
@@ -22,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body>
         <AuthProvider>
           <SocketProvider>
             <WorkspaceProvider>
