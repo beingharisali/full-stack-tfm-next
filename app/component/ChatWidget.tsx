@@ -221,13 +221,12 @@ const ChatWidget: React.FC = () => {
     if (user) {
       console.log("Current user:", user);
 
-      // Get all users
       getAllUsers()
         .then((response) => {
           console.log("All users response:", response);
           console.log("Current user ID:", user?.id);
           console.log("All users from API:", response.users);
-          setAllUsers(response.users.filter((u) => u.id !== user?.id)); // Exclude current user
+          setAllUsers(response.users.filter((u) => u.id !== user?.id)); 
         })
         .catch((error) => {
           console.error("Error loading all users:", error);
@@ -237,7 +236,6 @@ const ChatWidget: React.FC = () => {
           );
         });
 
-      // Get online users
       apiGetOnlineUsers()
         .then((users) => {
           console.log("Online users response:", users);
@@ -259,7 +257,6 @@ const ChatWidget: React.FC = () => {
     }
   }, [user]);
 
-  // Fetch messages when active recipient changes
   useEffect(() => {
     if (activeRecipient && user) {
       const fetchMessages = async () => {
@@ -268,7 +265,7 @@ const ChatWidget: React.FC = () => {
           const formattedMessages: Message[] = apiMessages.map((apiMsg) => ({
             id: apiMsg._id,
             senderId: apiMsg.sender,
-            senderName: "", // We'll need to populate this from user data
+            senderName: "", 
             recipientId: apiMsg.receiver,
             content: apiMsg.message,
             timestamp: new Date(apiMsg.createdAt),
@@ -276,7 +273,6 @@ const ChatWidget: React.FC = () => {
             isRead: apiMsg.isRead,
           }));
 
-          // Get user names for the messages
           const updatedMessages = await Promise.all(
             formattedMessages.map(async (msg) => {
               const senderUser = await getAllUsers().then((res) =>

@@ -31,7 +31,6 @@ export default function page() {
     });
   };
 
-  // All data fetching and state management is handled by the useAgentDashboard hook
 
   const getActivityIcon = (type: string) => {
     switch (type) {

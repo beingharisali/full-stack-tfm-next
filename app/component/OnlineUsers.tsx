@@ -8,7 +8,7 @@ interface User {
   firstName?: string;
   lastName?: string;
   email?: string;
-  [key: string]: any; // Allow additional properties
+  [key: string]: any; 
 }
 
 export default function OnlineUsers() {
