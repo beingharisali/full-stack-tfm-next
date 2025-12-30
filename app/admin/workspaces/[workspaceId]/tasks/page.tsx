@@ -13,7 +13,7 @@ import {
   deleteTask,
   Task,
 } from "../../../../../services/task.api";
-import TaskForm from "../../../../../app/component/TaskForm";
+import TaskForm from "../../../../component/TaskForm";
 import ChatWidget from "../../../../../app/component/ChatWidget";
 import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
