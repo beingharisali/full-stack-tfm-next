@@ -3,14 +3,13 @@ import { useEffect, useState } from "react";
 import socket from "@/utils/socket";
 import axios from "@/utils/axios";
 
-// Define TypeScript interfaces
 interface User {
   _id: string;
   name?: string;
   firstName?: string;
   lastName?: string;
   email: string;
-  [key: string]: any; // Allow additional properties
+  [key: string]: any;
 }
 
 interface Message {
@@ -20,7 +19,7 @@ interface Message {
   isEdited?: boolean;
   isRead?: boolean;
   createdAt?: string;
-  [key: string]: any; // Allow additional properties
+  [key: string]: any; 
 }
 
 interface ChatBoxProps {

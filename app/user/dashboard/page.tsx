@@ -16,8 +16,6 @@ export default function page() {
 		});
 	};
 
-	// All data fetching and state management is handled by the useUserDashboard hook
-
 	return (
 		<>
 			<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8">

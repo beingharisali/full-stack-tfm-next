@@ -129,7 +129,6 @@ const WorkspaceManagementPage = () => {
       setLoading(true);
       await deleteWorkspace(workspaceId);
       setSuccess(`Workspace "${workspaceName}" deleted successfully!`);
-      // Refresh the workspaces list
       const response = await getUserWorkspaces();
       setWorkspaces(response || []);
       setTimeout(() => setSuccess(""), 3000);

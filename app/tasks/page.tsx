@@ -129,7 +129,6 @@ export default function TasksPage() {
     setFormLoading(true);
     try {
       if (task._id) {
-        // Update existing task
         await updateTaskApi(task._id, {
           title: task.title,
           description: task.description,
@@ -141,7 +140,6 @@ export default function TasksPage() {
         });
         toast.success("Task updated successfully!");
       } else {
-        // Create new task
         await createTaskApi({
           title: task.title,
           description: task.description,

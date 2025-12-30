@@ -12,7 +12,6 @@ export default function AdminTasksPage() {
   const { tasks, loading, fetchTasks, handleStatusChange, handleDeleteTask } = useAdminTasks();
   const router = useRouter();
 
-  // All task management logic is handled by the useAdminTasks hook
 
   const handleEditClick = (task: Task) => {
 
