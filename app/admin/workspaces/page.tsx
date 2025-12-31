@@ -54,18 +54,22 @@ const WorkspaceManagementPage = () => {
         console.log("Fetching workspaces from API");
         const response = await getUserWorkspaces();
         console.log("Received workspaces response:", response);
+        
         if (response && Array.isArray(response)) {
           setWorkspaces(response);
           console.log("Workspaces set in state:", response);
-        } else if (
-          response &&
-          response.workspaces &&
-          Array.isArray(response.workspaces)
-        ) {
-          setWorkspaces(response.workspaces);
-          console.log("Workspaces set in state:", response.workspaces);
         } else {
-          console.log("Unexpected response format:", response);
+          if (response && typeof response === 'object' && 'workspaces' in response) {
+            const workspaceResponse = response as { workspaces: Workspace[] };
+            if (workspaceResponse.workspaces && Array.isArray(workspaceResponse.workspaces)) {
+              setWorkspaces(workspaceResponse.workspaces);
+              console.log("Workspaces set in state:", workspaceResponse.workspaces);
+            } else {
+              console.log("Workspaces property not found or not an array");
+            }
+          } else {
+            console.log("Unexpected response format:", response);
+          }
         }
       } catch (err) {
         console.error("Error fetching workspaces:", err);
@@ -130,7 +134,14 @@ const WorkspaceManagementPage = () => {
       await deleteWorkspace(workspaceId);
       setSuccess(`Workspace "${workspaceName}" deleted successfully!`);
       const response = await getUserWorkspaces();
-      setWorkspaces(response || []);
+      if (response && Array.isArray(response)) {
+        setWorkspaces(response);
+      } else if (response && typeof response === 'object' && 'workspaces' in response) {
+        const workspaceResponse = response as { workspaces: Workspace[] };
+        setWorkspaces(workspaceResponse.workspaces || []);
+      } else {
+        setWorkspaces([]);
+      }
       setTimeout(() => setSuccess(""), 3000);
     } catch (err: any) {
       setError(
